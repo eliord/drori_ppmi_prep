@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: drori_ppmi_prep
+Version: 0.1.0
+Summary: PPMI DICOM to NIfTI conversion tools
+Requires-Python: >=3.8

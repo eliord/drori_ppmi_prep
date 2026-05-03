@@ -1,0 +1,6 @@
+[console_scripts]
+drori-ppmi-build-analysis = drori_ppmi_prep.run_analysis_dir_builder:main
+drori-ppmi-build-metadata = drori_ppmi_prep.run_metadata_builder:main
+drori-ppmi-convert = drori_ppmi_prep.run_nii_conversion:main
+drori-ppmi-register-to-t1 = drori_ppmi_prep.run_t1_space_registrations:main
+drori-ppmi-run-pipeline = drori_ppmi_prep.run_full_ppmi_pipeline:main

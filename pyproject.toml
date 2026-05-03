@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "drori_ppmi_prep"
+version = "0.1.0"
+description = "PPMI DICOM to NIfTI conversion tools"
+requires-python = ">=3.8"
+
+[project.scripts]
+drori-ppmi-convert = "drori_ppmi_prep.run_nii_conversion:main"
+drori-ppmi-build-metadata = "drori_ppmi_prep.run_metadata_builder:main"
+drori-ppmi-build-analysis = "drori_ppmi_prep.run_analysis_dir_builder:main"
+drori-ppmi-register-to-t1 = "drori_ppmi_prep.run_t1_space_registrations:main"
+drori-ppmi-run-pipeline = "drori_ppmi_prep.run_full_ppmi_pipeline:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
