@@ -5,31 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="886b7927-8e2e-4689-a074-c3ebdf4d8cbf" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/drori_ppmi_prep.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/build_analysis_dir.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/dicom_conversion.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/extend_metadata_from_dicom.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/fsl_flirt_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/metadata_builder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/run_analysis_dir_builder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/run_full_ppmi_pipeline.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/run_metadata_builder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/run_nii_conversion.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/run_synthstrip_native.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/run_t1_space_registrations.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/segmentation/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/segmentation/fslfirst.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/synthstrip_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/segmentation/freesurfer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/segmentation/run_all_segmentations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/drori_ppmi_prep/segmentation/fslfirst.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/drori_ppmi_prep/segmentation/fsl_first.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

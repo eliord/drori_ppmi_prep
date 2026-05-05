@@ -14,37 +14,14 @@ def run_fsl_first(
     boundary_correction: str = "auto",
     structures: list[str] | None = None,
     affine_matrix: str | Path | None = None,
-) -> None:
+) -> Path:
     """
     Run FSL FIRST on a single input image and write outputs into output_dir.
 
-    Parameters
-    ----------
-    input_image
-        Path to the input image.
-    output_dir
-        Directory where FIRST outputs will be written.
-    first_cmd
-        FIRST executable name or full path.
-    overwrite
-        Whether to overwrite existing outputs.
-    brain_extracted
-        If True, pass '-b' to FIRST.
-    boundary_correction
-        Value for FIRST '-m' option.
-    structures
-        Optional list of structures to segment.
-    affine_matrix
-        Optional affine matrix passed with '-a'.
-
-    Notes
-    -----
-    FIRST writes outputs from an output basename, not just a directory.
-    This function uses:
-
-        output_dir / "fslfirst"
-
-    as the basename.
+    Returns
+    -------
+    Path
+        The output directory.
     """
     input_image = Path(input_image)
     output_dir = Path(output_dir)
@@ -58,11 +35,11 @@ def run_fsl_first(
         )
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    out_basename = output_dir / "fslfirst"
+    out_basename = output_dir / "first"
 
     expected_main_output = output_dir / "first_all_fast_firstseg.nii.gz"
     if expected_main_output.exists() and not overwrite:
-        return
+        return output_dir
 
     if overwrite:
         for p in output_dir.iterdir():
@@ -97,3 +74,6 @@ def run_fsl_first(
             f"stdout:\n{result.stdout}\n"
             f"stderr:\n{result.stderr}"
         )
+
+    return output_dir
+
