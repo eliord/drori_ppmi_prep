@@ -80,6 +80,23 @@ drori-ppmi-run-freesurfer ANALYSIS_ROOT
 Use `--help` on any command to see available options, including alternate tool
 paths, overwrite behavior, parallel execution, and segmentation skip flags.
 
+Example full-pipeline command with common flags:
+
+```bash
+drori-ppmi-run-pipeline PPMI_ROOT IDASEARCH_DIR OUTPUT_ROOT \
+  --parallel \
+  --max-workers 8 \
+  --force \
+  --dcm2niix-cmd dcm2niix \
+  --synthstrip-cmd mri_synthstrip \
+  --flirt-cmd flirt \
+  --first-cmd run_first_all \
+  --skip-freesurfer
+```
+
+For example, use `--skip-first`, `--skip-dbsegment`, or `--skip-freesurfer` to
+disable optional segmentations during the full pipeline.
+
 ## Output Structure
 
 The infrastructure step writes outputs under `OUTPUT_ROOT`:
