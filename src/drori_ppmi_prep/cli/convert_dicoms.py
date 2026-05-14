@@ -1,6 +1,6 @@
 import argparse
 
-from drori_ppmi_prep.dicom_conversion import convert_ppmi_dicoms_to_nifti
+from drori_ppmi_prep.conversion.dicom_to_nifti import convert_ppmi_dicoms_to_nifti
 
 
 def main():

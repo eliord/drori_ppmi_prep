@@ -41,7 +41,7 @@ def build_analysis_dataset_from_metadata(
     output_root : str or Path
         Root directory where the analysis dataset will be created.
     overwrite : bool
-        If True, replace existing symlinks/files.
+        If True, replace existing symlinks.
 
     Returns
     -------

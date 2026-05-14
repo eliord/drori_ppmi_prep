@@ -1,6 +1,11 @@
 [console_scripts]
-drori-ppmi-build-analysis = drori_ppmi_prep.run_analysis_dir_builder:main
-drori-ppmi-build-metadata = drori_ppmi_prep.run_metadata_builder:main
-drori-ppmi-convert = drori_ppmi_prep.run_nii_conversion:main
-drori-ppmi-register-to-t1 = drori_ppmi_prep.run_t1_space_registrations:main
-drori-ppmi-run-pipeline = drori_ppmi_prep.run_full_ppmi_pipeline:main
+drori-ppmi-build-analysis = drori_ppmi_prep.cli.build_analysis:main
+drori-ppmi-build-infrastructure = drori_ppmi_prep.cli.build_infrastructure:main
+drori-ppmi-build-metadata = drori_ppmi_prep.cli.build_metadata:main
+drori-ppmi-convert = drori_ppmi_prep.cli.convert_dicoms:main
+drori-ppmi-register-to-t1 = drori_ppmi_prep.cli.register_to_t1:main
+drori-ppmi-run-dbsegment = drori_ppmi_prep.cli.run_dbsegment:main
+drori-ppmi-run-first = drori_ppmi_prep.cli.run_first:main
+drori-ppmi-run-freesurfer = drori_ppmi_prep.cli.run_freesurfer:main
+drori-ppmi-run-pipeline = drori_ppmi_prep.cli.run_pipeline:main
+drori-ppmi-run-session = drori_ppmi_prep.cli.run_session:main

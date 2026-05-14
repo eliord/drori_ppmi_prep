@@ -1,6 +1,6 @@
 import argparse
 
-from drori_ppmi_prep.build_analysis_dir import build_analysis_dataset_from_metadata
+from drori_ppmi_prep.analysis.dataset_builder import build_analysis_dataset_from_metadata
 
 
 def main():

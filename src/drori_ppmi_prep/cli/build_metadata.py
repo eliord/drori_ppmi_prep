@@ -1,8 +1,8 @@
 import argparse
 from pathlib import Path
 
-from drori_ppmi_prep.metadata_builder import build_ppmi_metadata_csv
-from drori_ppmi_prep.extend_metadata_from_dicom import enrich_metadata_with_dicom_info
+from drori_ppmi_prep.metadata.builder import build_ppmi_metadata_csv
+from drori_ppmi_prep.metadata.dicom_enrichment import enrich_metadata_with_dicom_info
 
 
 def main():

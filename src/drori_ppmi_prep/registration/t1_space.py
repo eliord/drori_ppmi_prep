@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from drori_ppmi_prep.fsl_flirt_utils import register_then_apply_to_others
+from drori_ppmi_prep.registration.flirt import register_then_apply_to_others
 
 
 def register_session_to_t1_space(
@@ -13,7 +13,7 @@ def register_session_to_t1_space(
     dof: int = 9,
     cost: str = "corratio",
     interp: str = "trilinear",
-) -> None:
+):
     session_dir = Path(session_dir)
 
     t1_native = session_dir / "T1.nii.gz"
@@ -25,20 +25,33 @@ def register_session_to_t1_space(
     pd_brain = synthstrip_dir / "PD_brainmask.nii.gz"
 
     if not t1_native.exists():
-        raise FileNotFoundError(f"Missing T1 image: {t1_native}")
+        return None, "missing"
     if not pd_native.exists():
-        raise FileNotFoundError(f"Missing PD image: {pd_native}")
+        return None, "missing"
     if not t1_brain.exists():
-        raise FileNotFoundError(f"Missing brainmasked T1 image: {t1_brain}")
+        return None, "missing"
     if not pd_brain.exists():
-        raise FileNotFoundError(f"Missing brainmasked PD image: {pd_brain}")
+        return None, "missing"
 
     out_dir = session_dir / "t1_space"
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    expected_outputs = [
+        out_dir / "T1.nii.gz",
+        out_dir / "PD.nii.gz",
+        out_dir / "flirt9dof_PD_to_T1.mat",
+    ]
+    if t2_native.exists():
+        expected_outputs.append(out_dir / "T2.nii.gz")
+
+    if all(path.exists() for path in expected_outputs) and not overwrite:
+        return out_dir, "skipped"
+
     t1_link = out_dir / "T1.nii.gz"
+
     if overwrite and (t1_link.exists() or t1_link.is_symlink()):
         t1_link.unlink()
+
     if not t1_link.exists():
         t1_link.symlink_to(t1_native.resolve())
 
@@ -61,6 +74,11 @@ def register_session_to_t1_space(
         interp=interp,
         overwrite=overwrite,
     )
+
+    if all(path.exists() for path in expected_outputs):
+        return out_dir, "done"
+
+    return None, "failed"
 
 
 def run_t1_space_registrations(
