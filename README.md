@@ -113,16 +113,16 @@ For each analysis session, the session pipeline then runs:
 
 1. Run SynthStrip on native `T1`, `T2`, and `PD` images, with both regular and
    no-CSF outputs written under `segmentation_native/synthstrip/`.
-2. Link the native T1 SynthStrip outputs into
+2. Link the native T1-reference SynthStrip outputs into
    `t1_space/segmentation/synthstrip/`.
-3. Register brain-masked `PD` to brain-masked `T1` using FSL FLIRT, save
-   `flirt9dof_PD_to_T1.mat`, and apply the transform to the native `PD` and
-   `T2` images to create `t1_space/PD.nii.gz` and `t1_space/T2.nii.gz`.
-4. Optionally run FSL FIRST on the T1 SynthStrip brain image and erode
+3. Register brain-masked `PD` to the brain-masked T1 reference using FSL FLIRT,
+   save `flirt9dof_PD_to_T1.mat`, and apply the transform to the native `PD`
+   and `T2` images to create `t1_space/PD.nii.gz` and `t1_space/T2.nii.gz`.
+4. Optionally run FSL FIRST on the T1 reference and erode
    `first_all_fast_firstseg.nii.gz` to create
    `first_all_fast_firstseg_eroded.nii.gz`.
-5. Optionally run DBSegment on the T1 SynthStrip brain image.
-6. Optionally run FreeSurfer `recon-all` on `t1_space/T1.nii.gz`, link the
+5. Optionally run DBSegment on the T1 reference.
+6. Optionally run FreeSurfer `recon-all` on the T1 reference, link the
    FreeSurfer `mri/` directory into the session segmentation directory, and
    export FreeSurfer `.mgz` volumes back into the session T1 space under
    `freesurfer/t1_space_outputs/`.
