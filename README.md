@@ -121,6 +121,29 @@ PPMI_analysis/SUBJECT_ID/SESSION_ID/
   t1_space/
 ```
 
+After T1-space registration and segmentation, `t1_space/` contains the
+registered session images, transform matrix, and segmentation outputs:
+
+```text
+t1_space/
+  T1.nii.gz
+  T2.nii.gz
+  PD.nii.gz
+  flirt9dof_PD_to_T1.mat
+  segmentation/
+    synthstrip/
+      T1_brainmask.nii.gz
+      T1_brainmask_mask.nii.gz
+      T1_brainmask_nocsf.nii.gz
+      T1_brainmask_mask_nocsf.nii.gz
+    fslfirst/
+      first_all_fast_firstseg.nii.gz
+      first_all_fast_firstseg_eroded.nii.gz
+    dbsegment/
+    freesurfer/
+      t1_space_outputs/
+```
+
 ## Package Layout
 
 Core code is under `src/drori_ppmi_prep/`:
