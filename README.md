@@ -97,6 +97,36 @@ drori-ppmi-run-pipeline PPMI_ROOT IDASEARCH_DIR OUTPUT_ROOT \
 For example, use `--skip-first`, `--skip-dbsegment`, or `--skip-freesurfer` to
 disable optional segmentations during the full pipeline.
 
+## Pipeline Steps
+
+The full pipeline first builds the shared dataset infrastructure:
+
+1. Build `ppmi_metadata.csv` from the IDA search CSV files.
+2. Enrich the metadata table with selected DICOM header fields.
+3. Convert each PPMI DICOM image directory to NIfTI with `dcm2niix`.
+4. Build `PPMI_analysis/` with one subject/session folder per metadata row and
+   standardized `T1.nii.gz`, `T2.nii.gz`, and `PD.nii.gz` links.
+5. Write `ppmi_config.json`, which stores the resolved paths used by later
+   session-level commands.
+
+For each analysis session, the session pipeline then runs:
+
+1. Run SynthStrip on native `T1`, `T2`, and `PD` images, with both regular and
+   no-CSF outputs written under `segmentation_native/synthstrip/`.
+2. Link the native T1 SynthStrip outputs into
+   `t1_space/segmentation/synthstrip/`.
+3. Register brain-masked `PD` to brain-masked `T1` using FSL FLIRT, save
+   `flirt9dof_PD_to_T1.mat`, and apply the transform to the native `PD` and
+   `T2` images to create `t1_space/PD.nii.gz` and `t1_space/T2.nii.gz`.
+4. Optionally run FSL FIRST on the T1 SynthStrip brain image and erode
+   `first_all_fast_firstseg.nii.gz` to create
+   `first_all_fast_firstseg_eroded.nii.gz`.
+5. Optionally run DBSegment on the T1 SynthStrip brain image.
+6. Optionally run FreeSurfer `recon-all` on `t1_space/T1.nii.gz`, link the
+   FreeSurfer `mri/` directory into the session segmentation directory, and
+   export FreeSurfer `.mgz` volumes back into the session T1 space under
+   `freesurfer/t1_space_outputs/`.
+
 ## Output Structure
 
 The infrastructure step writes outputs under `OUTPUT_ROOT`:
