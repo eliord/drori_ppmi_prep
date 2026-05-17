@@ -50,6 +50,7 @@ def run_session_pipeline(
     mri_vol2vol_cmd="mri_vol2vol",
     dbsegment_cmd="DBSegment",
     dbsegment_model_path=None,
+    dbsegment_use_cuda=True,
     run_first_segmentation=True,
     run_freesurfer_segmentation=True,
     run_dbsegment_segmentation=True,
@@ -142,6 +143,7 @@ def run_session_pipeline(
             model_path=dbsegment_model_path,
             dbsegment_cmd=dbsegment_cmd,
             overwrite=force,
+            use_cuda=dbsegment_use_cuda,
         )
 
         print_done_or_skipped(status)
@@ -199,6 +201,11 @@ def main():
     parser.add_argument("--first-cmd", default="run_first_all")
 
     parser.add_argument("--dbsegment-cmd", default="DBSegment")
+    parser.add_argument(
+        "--dbsegment-cpu",
+        action="store_true",
+        help="Run DBSegment with CUDA disabled by setting CUDA_VISIBLE_DEVICES=''.",
+    )
 
     parser.add_argument("--freesurfer-cmd", default="recon-all")
     parser.add_argument("--mri-vol2vol-cmd", default="mri_vol2vol")
@@ -219,6 +226,7 @@ def main():
         run_freesurfer_segmentation=not args.skip_freesurfer,
 
         dbsegment_cmd=args.dbsegment_cmd,
+        dbsegment_use_cuda=not args.dbsegment_cpu,
         run_dbsegment_segmentation=not args.skip_dbsegment,
     )
 

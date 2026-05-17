@@ -91,6 +91,7 @@ drori-ppmi-run-pipeline PPMI_ROOT IDASEARCH_DIR OUTPUT_ROOT \
   --synthstrip-cmd mri_synthstrip \
   --flirt-cmd flirt \
   --first-cmd run_first_all \
+  --dbsegment-cpu \
   --skip-freesurfer
 ```
 

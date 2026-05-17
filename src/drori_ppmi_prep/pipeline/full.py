@@ -39,6 +39,7 @@ def run_one_session(job):
         freesurfer_cmd,
         mri_vol2vol_cmd,
         dbsegment_cmd,
+        dbsegment_use_cuda,
         run_first,
         run_freesurfer,
         run_dbsegment,
@@ -57,6 +58,7 @@ def run_one_session(job):
             freesurfer_cmd=freesurfer_cmd,
             mri_vol2vol_cmd=mri_vol2vol_cmd,
             dbsegment_cmd=dbsegment_cmd,
+            dbsegment_use_cuda=dbsegment_use_cuda,
             run_first_segmentation=run_first,
             run_freesurfer_segmentation=run_freesurfer,
             run_dbsegment_segmentation=run_dbsegment,
@@ -95,6 +97,11 @@ def main():
     parser.add_argument("--flirt-cmd", default="flirt")
     parser.add_argument("--first-cmd", default="run_first_all")
     parser.add_argument("--dbsegment-cmd", default="DBSegment")
+    parser.add_argument(
+        "--dbsegment-cpu",
+        action="store_true",
+        help="Run DBSegment with CUDA disabled by setting CUDA_VISIBLE_DEVICES=''.",
+    )
     parser.add_argument("--freesurfer-cmd", default="recon-all")
     parser.add_argument("--mri-vol2vol-cmd", default="mri_vol2vol")
     parser.add_argument("--file-pattern", default="*.csv")
@@ -160,6 +167,7 @@ def main():
                     args.freesurfer_cmd,
                     args.mri_vol2vol_cmd,
                     args.dbsegment_cmd,
+                    not args.dbsegment_cpu,
                     not args.skip_first,
                     not args.skip_freesurfer,
                     not args.skip_dbsegment,

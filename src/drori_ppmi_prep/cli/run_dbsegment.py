@@ -9,6 +9,7 @@ def run_dbsegment_segmentations(
     model_path=None,
     dbsegment_cmd="DBSegment",
     overwrite=False,
+    use_cuda=True,
 ):
     analysis_root = Path(analysis_root)
 
@@ -46,6 +47,7 @@ def run_dbsegment_segmentations(
                 model_path=model_path,
                 dbsegment_cmd=dbsegment_cmd,
                 overwrite=overwrite,
+                use_cuda=use_cuda,
             )
 
             processed_sessions += 1
@@ -76,6 +78,11 @@ def main():
         action="store_true",
         help="Overwrite existing outputs",
     )
+    parser.add_argument(
+        "--dbsegment-cpu",
+        action="store_true",
+        help="Run DBSegment with CUDA disabled by setting CUDA_VISIBLE_DEVICES=''.",
+    )
 
     args = parser.parse_args()
 
@@ -84,6 +91,7 @@ def main():
         model_path=args.model_path,
         dbsegment_cmd=args.dbsegment_cmd,
         overwrite=args.overwrite,
+        use_cuda=not args.dbsegment_cpu,
     )
 
 

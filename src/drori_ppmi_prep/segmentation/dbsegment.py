@@ -1,5 +1,6 @@
 import shutil
 import shlex
+import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -21,6 +22,7 @@ def run_dbsegment(
     model_path=None,
     dbsegment_cmd="DBSegment",
     overwrite=False,
+    use_cuda=True,
 ):
     input_image = Path(input_image)
     output_dir = Path(output_dir)
@@ -55,7 +57,12 @@ def run_dbsegment(
         if model_path is not None:
             cmd.extend(["-mp", str(Path(model_path))])
 
-        command_log.write_text(shlex.join(cmd) + "\n")
+        env = os.environ.copy()
+        if not use_cuda:
+            env["CUDA_VISIBLE_DEVICES"] = ""
+
+        env_prefix = "CUDA_VISIBLE_DEVICES='' " if not use_cuda else ""
+        command_log.write_text(env_prefix + shlex.join(cmd) + "\n")
 
         with stdout_log.open("w") as stdout_f, stderr_log.open("w") as stderr_f:
             try:
@@ -64,6 +71,7 @@ def run_dbsegment(
                     text=True,
                     stdout=stdout_f,
                     stderr=stderr_f,
+                    env=env,
                 )
             except Exception as e:
                 stderr_f.write(f"{type(e).__name__}: {e}\n")
