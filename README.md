@@ -91,12 +91,12 @@ drori-ppmi-run-pipeline PPMI_ROOT IDASEARCH_DIR OUTPUT_ROOT \
   --synthstrip-cmd mri_synthstrip \
   --flirt-cmd flirt \
   --first-cmd run_first_all \
-  --dbsegment-cpu \
   --skip-freesurfer
 ```
 
 For example, use `--skip-first`, `--skip-dbsegment`, or `--skip-freesurfer` to
-disable optional segmentations during the full pipeline.
+disable optional segmentations during the full pipeline. When `--parallel` is
+used, DBSegment is run CPU-only automatically to avoid concurrent CUDA use.
 
 ## Pipeline Steps
 

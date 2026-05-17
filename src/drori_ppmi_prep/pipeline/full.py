@@ -100,7 +100,10 @@ def main():
     parser.add_argument(
         "--dbsegment-cpu",
         action="store_true",
-        help="Run DBSegment with CUDA disabled by setting CUDA_VISIBLE_DEVICES=''.",
+        help=(
+            "Run DBSegment with CUDA disabled. This is applied automatically "
+            "when --parallel is used."
+        ),
     )
     parser.add_argument("--freesurfer-cmd", default="recon-all")
     parser.add_argument("--mri-vol2vol-cmd", default="mri_vol2vol")
@@ -167,7 +170,7 @@ def main():
                     args.freesurfer_cmd,
                     args.mri_vol2vol_cmd,
                     args.dbsegment_cmd,
-                    not args.dbsegment_cpu,
+                    not (args.parallel or args.dbsegment_cpu),
                     not args.skip_first,
                     not args.skip_freesurfer,
                     not args.skip_dbsegment,
