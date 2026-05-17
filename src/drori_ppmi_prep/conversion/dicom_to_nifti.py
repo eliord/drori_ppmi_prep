@@ -38,7 +38,19 @@ def gzip_nifti_file(path):
     return output_path
 
 
-def find_existing_nifti_outputs(out_dir, image_id):
+def find_expected_nifti_outputs(out_dir, image_id):
+    candidates = []
+
+    for stem in [image_id, f"{image_id}_e1", f"{image_id}_e2"]:
+        candidates.extend([
+            out_dir / f"{stem}.nii.gz",
+            out_dir / f"{stem}.nii",
+        ])
+
+    return sorted(path for path in candidates if path.exists())
+
+
+def find_related_nifti_outputs(out_dir, image_id):
     return sorted(
         list(out_dir.glob(f"{image_id}*.nii.gz"))
         + list(out_dir.glob(f"{image_id}*.nii"))
@@ -69,7 +81,7 @@ def convert_one_dicom_dir(job):
     out_dir = output_root / subject_id / sequence_name / session_id
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    existing_outputs = find_existing_nifti_outputs(out_dir, image_id)
+    existing_outputs = find_expected_nifti_outputs(out_dir, image_id)
 
     if existing_outputs and not overwrite:
         gz_outputs = [
@@ -81,7 +93,7 @@ def convert_one_dicom_dir(job):
             return gz_outputs[0], "skipped"
 
     if overwrite:
-        for output_path in existing_outputs:
+        for output_path in find_related_nifti_outputs(out_dir, image_id):
             output_path.unlink()
 
     cmd = [
@@ -103,7 +115,7 @@ def convert_one_dicom_dir(job):
     if result.returncode != 0:
         return None, "failed"
 
-    new_outputs = find_existing_nifti_outputs(out_dir, image_id)
+    new_outputs = find_expected_nifti_outputs(out_dir, image_id)
 
     if new_outputs:
         gz_outputs = [
