@@ -42,10 +42,7 @@ def find_expected_nifti_outputs(out_dir, image_id):
     candidates = []
 
     for stem in [image_id, f"{image_id}_e1", f"{image_id}_e2"]:
-        candidates.extend([
-            out_dir / f"{stem}.nii.gz",
-            out_dir / f"{stem}.nii",
-        ])
+        candidates.append(out_dir / f"{stem}.nii.gz")
 
     return sorted(path for path in candidates if path.exists())
 
