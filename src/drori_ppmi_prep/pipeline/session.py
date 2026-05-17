@@ -72,7 +72,7 @@ def run_session_pipeline(
     print(f" [START] {subject_id} / {session_id}")
     step = 1
 
-    print(f"  ({step}/{total_steps}): Running SynthStrip ({synthstrip_cmd})... ", end="")
+    print(f"  ({step}/{total_steps}): Running SynthStrip ({synthstrip_cmd})... ", end="", flush=True)
     _, status1 = run_native_synthstrip(session_dir, "T1", overwrite=force, synthstrip_cmd=synthstrip_cmd)
     _, status2 = run_native_synthstrip(session_dir, "T2", overwrite=force, synthstrip_cmd=synthstrip_cmd)
     _, status3 = run_native_synthstrip(session_dir, "PD", overwrite=force, synthstrip_cmd=synthstrip_cmd)
@@ -96,7 +96,7 @@ def run_session_pipeline(
     link_t1_synthstrip_files_to_t1_space(session_dir)
     step += 1
 
-    print(f"  ({step}/{total_steps}): Registering PD/T2 to T1 space ({flirt_cmd})... ", end="")
+    print(f"  ({step}/{total_steps}): Registering PD/T2 to T1 space ({flirt_cmd})... ", end="", flush=True)
     _, status = register_session_to_t1_space(
         session_dir=session_dir,
         overwrite=force,
@@ -107,7 +107,7 @@ def run_session_pipeline(
     step += 1
 
     if run_first_segmentation:
-        print(f"  ({step}/{total_steps}): Running FSL FIRST ({first_cmd})... ", end="")
+        print(f"  ({step}/{total_steps}): Running FSL FIRST ({first_cmd})... ", end="", flush=True)
 
         input_image = session_dir / "t1_space" / "segmentation" / "synthstrip" / "T1_brainmask.nii.gz"
         output_dir = session_dir / "t1_space" / "segmentation" / "fslfirst"
@@ -131,7 +131,7 @@ def run_session_pipeline(
         step += 1
 
     if run_dbsegment_segmentation:
-        print(f"  ({step}/{total_steps}): Running DBSegment ({dbsegment_cmd})... ", end="")
+        print(f"  ({step}/{total_steps}): Running DBSegment ({dbsegment_cmd})... ", end="", flush=True)
 
         dbsegment_model_path = output_root / "group_analysis" / "DBSegment"
         dbsegment_model_path.mkdir(parents=True, exist_ok=True)
@@ -148,7 +148,7 @@ def run_session_pipeline(
         step += 1
 
     if run_freesurfer_segmentation:
-        print(f"  ({step}/{total_steps}): Running FreeSurfer ({freesurfer_cmd})... ", end="")
+        print(f"  ({step}/{total_steps}): Running FreeSurfer ({freesurfer_cmd})... ", end="", flush=True)
 
         reference_t1 = session_dir / "t1_space" / "T1.nii.gz"
         subjects_dir = output_root / "group_analysis" / "FreeSurfer"
