@@ -5,6 +5,11 @@ import os
 import pandas as pd
 
 
+def is_gzip_file(path: Path) -> bool:
+    with open(path, "rb") as f:
+        return f.read(2) == b"\x1f\x8b"
+
+
 def build_analysis_dataset_from_metadata(
     metadata_csv: str | Path,
     nifti_root: str | Path,
@@ -160,23 +165,18 @@ def build_analysis_dataset_from_metadata(
         candidates = [
             f"I{image_id}.nii.gz",
             f"{image_id}.nii.gz",
-            f"I{image_id}.nii",
-            f"{image_id}.nii",
             f"I{image_id}_e1.nii.gz",
             f"{image_id}_e1.nii.gz",
-            f"I{image_id}_e1.nii",
-            f"{image_id}_e1.nii",
             f"I{image_id}_e2.nii.gz",
             f"{image_id}_e2.nii.gz",
-            f"I{image_id}_e2.nii",
-            f"{image_id}_e2.nii",
         ]
 
         # Expected structure: SUBJECT/SEQUENCE/SESSION/file
         for filename in candidates:
             matches = list(subject_dir.glob(f"*/{session_str}/{filename}"))
-            if matches:
-                return matches[0]
+            valid_matches = [path for path in matches if is_gzip_file(path)]
+            if valid_matches:
+                return valid_matches[0]
 
         return None
 
@@ -218,10 +218,7 @@ def build_analysis_dataset_from_metadata(
             selected[f"{weighting}_Path"] = str(nifti_path) if nifti_path is not None else ""
 
             if nifti_path is not None:
-                suffix = ".nii.gz" if nifti_path.name.endswith(".nii.gz") else nifti_path.suffix
-                # Destination names should be fixed to T1.nii.gz, etc.
-                dst_name = f"{weighting}.nii.gz" if suffix in [".gz", ".nii"] else f"{weighting}.nii.gz"
-                safe_symlink(nifti_path, analysis_dir / dst_name, overwrite_link=overwrite)
+                safe_symlink(nifti_path, analysis_dir / f"{weighting}.nii.gz", overwrite_link=overwrite)
 
         selections.append({
             "SubjectID": subject_id,

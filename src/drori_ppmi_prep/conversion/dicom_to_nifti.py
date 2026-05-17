@@ -1,9 +1,41 @@
 from __future__ import annotations
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+import gzip
 import shutil
 import subprocess
 from typing import Union
+
+
+def is_gzip_file(path):
+    with open(path, "rb") as f:
+        return f.read(2) == b"\x1f\x8b"
+
+
+def gzip_nifti_file(path):
+    path = Path(path)
+
+    if path.name.endswith(".nii.gz"):
+        if is_gzip_file(path):
+            return path
+
+        output_path = path
+    elif path.suffix == ".nii":
+        output_path = path.with_suffix(".nii.gz")
+    else:
+        return None
+
+    tmp_path = output_path.with_name(output_path.name + ".tmp")
+
+    with open(path, "rb") as src, gzip.open(tmp_path, "wb") as dst:
+        shutil.copyfileobj(src, dst)
+
+    tmp_path.replace(output_path)
+
+    if path != output_path and path.exists():
+        path.unlink()
+
+    return output_path
 
 
 def find_existing_nifti_outputs(out_dir, image_id):
@@ -40,7 +72,17 @@ def convert_one_dicom_dir(job):
     existing_outputs = find_existing_nifti_outputs(out_dir, image_id)
 
     if existing_outputs and not overwrite:
-        return existing_outputs[0], "skipped"
+        gz_outputs = [
+            gzip_nifti_file(path)
+            for path in existing_outputs
+        ]
+        gz_outputs = sorted(path for path in gz_outputs if path is not None)
+        if gz_outputs:
+            return gz_outputs[0], "skipped"
+
+    if overwrite:
+        for output_path in existing_outputs:
+            output_path.unlink()
 
     cmd = [
         dcm2niix_path,
@@ -64,7 +106,13 @@ def convert_one_dicom_dir(job):
     new_outputs = find_existing_nifti_outputs(out_dir, image_id)
 
     if new_outputs:
-        return new_outputs[0], "done"
+        gz_outputs = [
+            gzip_nifti_file(path)
+            for path in new_outputs
+        ]
+        gz_outputs = sorted(path for path in gz_outputs if path is not None)
+        if gz_outputs:
+            return gz_outputs[0], "done"
 
     return None, "failed"
 
@@ -147,4 +195,3 @@ def convert_ppmi_dicoms_to_nifti(
         f"failed: {counts['failed']}, "
         f"unexpected layout: {counts['unexpected_layout']}."
     )
-
