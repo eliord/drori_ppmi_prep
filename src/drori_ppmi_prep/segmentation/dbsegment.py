@@ -60,8 +60,21 @@ def run_dbsegment(
         env = os.environ.copy()
         if not use_cuda:
             env["CUDA_VISIBLE_DEVICES"] = ""
+            existing_warnings = env.get("PYTHONWARNINGS", "")
+            cuda_warning_filter = "ignore:CUDA initialization:UserWarning"
+            env["PYTHONWARNINGS"] = (
+                f"{existing_warnings},{cuda_warning_filter}"
+                if existing_warnings
+                else cuda_warning_filter
+            )
+            cmd.extend(["--all_in_gpu", "False"])
 
-        env_prefix = "CUDA_VISIBLE_DEVICES='' " if not use_cuda else ""
+        env_prefix = (
+            "CUDA_VISIBLE_DEVICES='' "
+            f"PYTHONWARNINGS={shlex.quote(env['PYTHONWARNINGS'])} "
+            if not use_cuda
+            else ""
+        )
         command_log.write_text(env_prefix + shlex.join(cmd) + "\n")
 
         with stdout_log.open("w") as stdout_f, stderr_log.open("w") as stderr_f:
