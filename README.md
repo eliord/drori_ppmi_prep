@@ -86,6 +86,7 @@ Example full-pipeline command with common flags:
 drori-ppmi-run-pipeline PPMI_ROOT IDASEARCH_DIR OUTPUT_ROOT \
   --parallel \
   --max-workers 8 \
+  --skip-infrastructure-if-exists \
   --force \
   --dcm2niix-cmd dcm2niix \
   --synthstrip-cmd mri_synthstrip \
@@ -97,6 +98,9 @@ drori-ppmi-run-pipeline PPMI_ROOT IDASEARCH_DIR OUTPUT_ROOT \
 For example, use `--skip-first`, `--skip-dbsegment`, or `--skip-freesurfer` to
 disable optional segmentations during the full pipeline. When `--parallel` is
 used, DBSegment is run CPU-only automatically to avoid concurrent CUDA use.
+Use `--skip-infrastructure-if-exists` to rerun session-level processing without
+rebuilding metadata, NIfTI conversion, and the analysis directory when those
+outputs already exist.
 
 ## Pipeline Steps
 

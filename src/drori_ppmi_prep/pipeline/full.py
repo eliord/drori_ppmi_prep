@@ -27,6 +27,17 @@ def load_ppmi_config(output_root):
     return json.loads(config_path.read_text())
 
 
+def infrastructure_outputs_exist(output_root):
+    output_root = Path(output_root)
+    required_paths = [
+        output_root / "ppmi_config.json",
+        output_root / "ppmi_metadata.csv",
+        output_root / "PPMI_nifti",
+        output_root / "PPMI_analysis",
+    ]
+    return all(path.exists() for path in required_paths)
+
+
 def run_one_session(job):
     (
         output_root,
@@ -91,6 +102,14 @@ def main():
     parser.add_argument("output_root")
 
     parser.add_argument("--force", action="store_true")
+    parser.add_argument(
+        "--skip-infrastructure-if-exists",
+        action="store_true",
+        help=(
+            "Skip metadata, DICOM conversion, and analysis-directory building "
+            "when the expected infrastructure outputs already exist."
+        ),
+    )
 
     parser.add_argument("--dcm2niix-cmd", default="dcm2niix")
     parser.add_argument("--synthstrip-cmd", default="mri_synthstrip")
@@ -129,16 +148,21 @@ def main():
 
     output_root = Path(args.output_root)
 
-    run_build_infrastructure(
-        ppmi_root=args.ppmi_root,
-        idaSearch_dir=args.idaSearch_dir,
-        output_root=args.output_root,
-        file_pattern=args.file_pattern,
-        dcm2niix_cmd=args.dcm2niix_cmd,
-        force=args.force,
-        parallel=args.parallel,
-        max_workers=args.max_workers,
-    )
+    if args.skip_infrastructure_if_exists and infrastructure_outputs_exist(output_root):
+        print("-" * 70)
+        print("Skipping dataset infrastructure build: existing outputs found.")
+        print("-" * 70)
+    else:
+        run_build_infrastructure(
+            ppmi_root=args.ppmi_root,
+            idaSearch_dir=args.idaSearch_dir,
+            output_root=args.output_root,
+            file_pattern=args.file_pattern,
+            dcm2niix_cmd=args.dcm2niix_cmd,
+            force=args.force,
+            parallel=args.parallel,
+            max_workers=args.max_workers,
+        )
 
     print()
     print("-" * 70)
