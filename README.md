@@ -25,7 +25,10 @@ Install the package in editable mode from the repository root:
 pip install -e .
 ```
 
-Python dependencies are listed in `requirements.txt`.
+Python dependencies are declared in `pyproject.toml` and installed
+automatically by `pip`, including `mri-unbias` from the Mezer Lab GitHub
+repository. `requirements.txt` mirrors these runtime dependencies for
+environments that still install from requirements files.
 
 External tools are also required for the full pipeline:
 

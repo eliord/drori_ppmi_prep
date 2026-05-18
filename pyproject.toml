@@ -6,7 +6,15 @@ build-backend = "setuptools.build_meta"
 name = "drori_ppmi_prep"
 version = "0.1.0"
 description = "PPMI DICOM to NIfTI conversion tools"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
+dependencies = [
+    "pandas",
+    "nibabel",
+    "numpy",
+    "scipy",
+    "pydicom",
+    "mri-unbias @ git+https://github.com/MezerLab/mri_unbias.git#subdirectory=python",
+]
 
 [project.scripts]
 drori-ppmi-build-infrastructure = "drori_ppmi_prep.cli.build_infrastructure:main"
