@@ -60,6 +60,7 @@ def run_one_session(job):
         run_first,
         run_freesurfer,
         run_dbsegment,
+        run_bias_correction,
         quiet,
     ) = job
 
@@ -79,6 +80,7 @@ def run_one_session(job):
             run_first_segmentation=run_first,
             run_freesurfer_segmentation=run_freesurfer,
             run_dbsegment_segmentation=run_dbsegment,
+            run_bias_correction=run_bias_correction,
         )
 
     if quiet:
@@ -137,6 +139,7 @@ def main():
     parser.add_argument("--skip-freesurfer", action="store_true")
     parser.add_argument("--skip-dbsegment", action="store_true")
     parser.add_argument("--skip-first", action="store_true")
+    parser.add_argument("--skip-bias-correction", action="store_true")
 
     parser.add_argument(
         "--parallel",
@@ -204,6 +207,7 @@ def main():
                     not args.skip_first,
                     not args.skip_freesurfer,
                     not args.skip_dbsegment,
+                    not args.skip_bias_correction,
                     args.parallel
                 )
             )

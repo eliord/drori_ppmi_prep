@@ -98,12 +98,12 @@ drori-ppmi-run-pipeline PPMI_ROOT IDASEARCH_DIR OUTPUT_ROOT \
   --skip-freesurfer
 ```
 
-For example, use `--skip-first`, `--skip-dbsegment`, or `--skip-freesurfer` to
-disable optional segmentations during the full pipeline. When `--parallel` is
-used, DBSegment is run CPU-only automatically to avoid concurrent CUDA use.
-Use `--skip-infrastructure-if-exists` to rerun session-level processing without
-rebuilding metadata, NIfTI conversion, and the analysis directory when those
-outputs already exist.
+For example, use `--skip-first`, `--skip-dbsegment`, `--skip-freesurfer`, or
+`--skip-bias-correction` to disable optional processing during the full
+pipeline. When `--parallel` is used, DBSegment is run CPU-only automatically to
+avoid concurrent CUDA use. Use `--skip-infrastructure-if-exists` to rerun
+session-level processing without rebuilding metadata, NIfTI conversion, and the
+analysis directory when those outputs already exist.
 
 ## Pipeline Steps
 
@@ -134,6 +134,9 @@ For each analysis session, the session pipeline then runs:
    FreeSurfer `mri/` directory into the session segmentation directory, and
    export FreeSurfer `.mgz` volumes back into the session T1 space under
    `freesurfer/t1_space_outputs/`.
+7. Optionally run polynomial degree-2 bias correction on available
+   `t1_space/T1.nii.gz`, `PD.nii.gz`, and `T2.nii.gz` images using the
+   FreeSurfer white-matter mask.
 
 ## Output Structure
 
@@ -180,6 +183,13 @@ t1_space/
     dbsegment/
     freesurfer/
       t1_space_outputs/
+  mri_unbias_deg2/
+    T1.nii.gz
+    T1_bias.nii.gz
+    PD.nii.gz
+    PD_bias.nii.gz
+    T2.nii.gz
+    T2_bias.nii.gz
 ```
 
 ## Package Layout
@@ -191,6 +201,6 @@ Core code is under `src/drori_ppmi_prep/`:
 - `metadata/`: metadata table construction and DICOM header enrichment
 - `conversion/`: DICOM to NIfTI conversion
 - `analysis/`: analysis-directory creation
-- `preprocessing/`: SynthStrip helpers
+- `preprocessing/`: SynthStrip and bias-correction helpers
 - `registration/`: FSL FLIRT registration helpers
 - `segmentation/`: FSL FIRST, FreeSurfer, DBSegment, and segmentation utilities

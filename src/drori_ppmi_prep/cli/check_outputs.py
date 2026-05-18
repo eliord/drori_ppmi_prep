@@ -315,6 +315,22 @@ def build_checks(session_dir, native_sources=None):
         any_nifti_in(session_dir, Path("t1_space/segmentation/freesurfer/t1_space_outputs")),
     )
 
+    bias_mask = session_dir / "t1_space/segmentation/freesurfer/t1_space_outputs/wm.nii.gz"
+    bias_dir = session_dir / "t1_space/mri_unbias_deg2"
+    bias_images = [
+        image
+        for image in ["T1", "PD", "T2"]
+        if (session_dir / f"t1_space/{image}.nii.gz").exists()
+    ]
+    checks["mri_unbias_deg2"] = status(
+        bias_mask.exists() and bool(bias_images),
+        all(
+            (bias_dir / f"{image}.nii.gz").exists()
+            and (bias_dir / f"{image}_bias.nii.gz").exists()
+            for image in bias_images
+        ),
+    )
+
     return checks
 
 

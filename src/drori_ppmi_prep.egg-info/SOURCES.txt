@@ -30,6 +30,7 @@ src/drori_ppmi_prep/pipeline/full.py
 src/drori_ppmi_prep/pipeline/infrastructure.py
 src/drori_ppmi_prep/pipeline/session.py
 src/drori_ppmi_prep/preprocessing/__init__.py
+src/drori_ppmi_prep/preprocessing/bias_correction.py
 src/drori_ppmi_prep/preprocessing/native_synthstrip.py
 src/drori_ppmi_prep/preprocessing/synthstrip.py
 src/drori_ppmi_prep/registration/__init__.py

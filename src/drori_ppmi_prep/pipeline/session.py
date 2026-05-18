@@ -13,6 +13,7 @@ from drori_ppmi_prep.segmentation.freesurfer import (
     link_freesurfer_to_session,
     export_all_freesurfer_mgz_to_orig_space,
 )
+from drori_ppmi_prep.preprocessing.bias_correction import run_t1_space_bias_correction
 
 
 def load_ppmi_config(output_root):
@@ -54,6 +55,7 @@ def run_session_pipeline(
     run_first_segmentation=True,
     run_freesurfer_segmentation=True,
     run_dbsegment_segmentation=True,
+    run_bias_correction=True,
 ):
     config = load_ppmi_config(output_root)
     analysis_root = Path(config["analysis_root"])
@@ -68,6 +70,7 @@ def run_session_pipeline(
             + int(run_first_segmentation)
             + int(run_freesurfer_segmentation)
             + int(run_dbsegment_segmentation)
+            + int(run_bias_correction)
     )
 
     print(f" [START] {subject_id} / {session_id}")
@@ -179,6 +182,18 @@ def run_session_pipeline(
 
         step += 1
 
+    if run_bias_correction:
+        print(f"  ({step}/{total_steps}): Running polynomial bias correction... ", end="", flush=True)
+
+        _, status = run_t1_space_bias_correction(
+            session_dir=session_dir,
+            overwrite=force,
+            degree=2,
+        )
+
+        print_done_or_skipped(status)
+        step += 1
+
     print(f" [DONE ] {subject_id} / {session_id}")
     print(f"  Session dir: {session_dir}")
     print()
@@ -195,6 +210,7 @@ def main():
     parser.add_argument("--skip-first", action="store_true")
     parser.add_argument("--skip-freesurfer", action="store_true")
     parser.add_argument("--skip-dbsegment", action="store_true")
+    parser.add_argument("--skip-bias-correction", action="store_true")
 
     parser.add_argument("--synthstrip-cmd", default="mri_synthstrip")
     parser.add_argument("--flirt-cmd", default="flirt")
@@ -228,6 +244,7 @@ def main():
         dbsegment_cmd=args.dbsegment_cmd,
         dbsegment_use_cuda=not args.dbsegment_cpu,
         run_dbsegment_segmentation=not args.skip_dbsegment,
+        run_bias_correction=not args.skip_bias_correction,
     )
 
 
