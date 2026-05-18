@@ -3,6 +3,7 @@ drori-ppmi-build-analysis = drori_ppmi_prep.cli.build_analysis:main
 drori-ppmi-build-infrastructure = drori_ppmi_prep.cli.build_infrastructure:main
 drori-ppmi-build-metadata = drori_ppmi_prep.cli.build_metadata:main
 drori-ppmi-check-dbsegment = drori_ppmi_prep.cli.check_dbsegment_outputs:main
+drori-ppmi-check-outputs = drori_ppmi_prep.cli.check_outputs:main
 drori-ppmi-convert = drori_ppmi_prep.cli.convert_dicoms:main
 drori-ppmi-register-to-t1 = drori_ppmi_prep.cli.register_to_t1:main
 drori-ppmi-run-dbsegment = drori_ppmi_prep.cli.run_dbsegment:main

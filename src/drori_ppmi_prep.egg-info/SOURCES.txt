@@ -13,6 +13,7 @@ src/drori_ppmi_prep/cli/build_analysis.py
 src/drori_ppmi_prep/cli/build_infrastructure.py
 src/drori_ppmi_prep/cli/build_metadata.py
 src/drori_ppmi_prep/cli/check_dbsegment_outputs.py
+src/drori_ppmi_prep/cli/check_outputs.py
 src/drori_ppmi_prep/cli/convert_dicoms.py
 src/drori_ppmi_prep/cli/register_to_t1.py
 src/drori_ppmi_prep/cli/run_dbsegment.py
