@@ -19,7 +19,6 @@ drori-ppmi-register-to-t1 = "drori_ppmi_prep.cli.register_to_t1:main"
 drori-ppmi-run-first = "drori_ppmi_prep.cli.run_first:main"
 drori-ppmi-run-freesurfer = "drori_ppmi_prep.cli.run_freesurfer:main"
 drori-ppmi-run-dbsegment = "drori_ppmi_prep.cli.run_dbsegment:main"
-drori-ppmi-check-dbsegment = "drori_ppmi_prep.cli.check_dbsegment_outputs:main"
 drori-ppmi-check-outputs = "drori_ppmi_prep.cli.check_outputs:main"
 drori-ppmi-run-pipeline = "drori_ppmi_prep.cli.run_pipeline:main"
 

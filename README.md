@@ -76,7 +76,6 @@ drori-ppmi-run-first ANALYSIS_ROOT
 drori-ppmi-run-dbsegment ANALYSIS_ROOT
 drori-ppmi-run-freesurfer ANALYSIS_ROOT
 drori-ppmi-check-outputs OUTPUT_ROOT
-drori-ppmi-check-dbsegment OUTPUT_ROOT
 ```
 
 Use `--help` on any command to see available options, including alternate tool
