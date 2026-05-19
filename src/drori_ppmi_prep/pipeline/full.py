@@ -54,11 +54,13 @@ def run_one_session(job):
         synthstrip_cmd,
         flirt_cmd,
         first_cmd,
+        synthseg_cmd,
         freesurfer_cmd,
         mri_vol2vol_cmd,
         dbsegment_cmd,
         dbsegment_use_cuda,
         run_first,
+        run_synthseg,
         run_freesurfer,
         run_dbsegment,
         run_bias_correction,
@@ -74,11 +76,13 @@ def run_one_session(job):
             synthstrip_cmd=synthstrip_cmd,
             flirt_cmd=flirt_cmd,
             first_cmd=first_cmd,
+            synthseg_cmd=synthseg_cmd,
             freesurfer_cmd=freesurfer_cmd,
             mri_vol2vol_cmd=mri_vol2vol_cmd,
             dbsegment_cmd=dbsegment_cmd,
             dbsegment_use_cuda=dbsegment_use_cuda,
             run_first_segmentation=run_first,
+            run_synthseg_segmentation=run_synthseg,
             run_freesurfer_segmentation=run_freesurfer,
             run_dbsegment_segmentation=run_dbsegment,
             run_bias_correction=run_bias_correction,
@@ -124,6 +128,7 @@ def main():
     parser.add_argument("--synthstrip-cmd", default="mri_synthstrip")
     parser.add_argument("--flirt-cmd", default="flirt")
     parser.add_argument("--first-cmd", default="run_first_all")
+    parser.add_argument("--synthseg-cmd", default="mri_synthseg")
     parser.add_argument("--dbsegment-cmd", default="DBSegment")
     parser.add_argument(
         "--dbsegment-cpu",
@@ -140,6 +145,7 @@ def main():
     parser.add_argument("--skip-freesurfer", action="store_true")
     parser.add_argument("--skip-dbsegment", action="store_true")
     parser.add_argument("--skip-first", action="store_true")
+    parser.add_argument("--skip-synthseg", action="store_true")
     parser.add_argument("--skip-bias-correction", action="store_true")
 
     parser.add_argument(
@@ -201,11 +207,13 @@ def main():
                     args.synthstrip_cmd,
                     args.flirt_cmd,
                     args.first_cmd,
+                    args.synthseg_cmd,
                     args.freesurfer_cmd,
                     args.mri_vol2vol_cmd,
                     args.dbsegment_cmd,
                     not (args.parallel or args.dbsegment_cpu),
                     not args.skip_first,
+                    not args.skip_synthseg,
                     not args.skip_freesurfer,
                     not args.skip_dbsegment,
                     not args.skip_bias_correction,

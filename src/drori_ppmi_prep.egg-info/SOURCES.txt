@@ -20,6 +20,7 @@ src/drori_ppmi_prep/cli/run_first.py
 src/drori_ppmi_prep/cli/run_freesurfer.py
 src/drori_ppmi_prep/cli/run_pipeline.py
 src/drori_ppmi_prep/cli/run_session.py
+src/drori_ppmi_prep/cli/run_synthseg.py
 src/drori_ppmi_prep/conversion/__init__.py
 src/drori_ppmi_prep/conversion/dicom_to_nifti.py
 src/drori_ppmi_prep/metadata/__init__.py
@@ -42,4 +43,5 @@ src/drori_ppmi_prep/segmentation/dbsegment.py
 src/drori_ppmi_prep/segmentation/directory_builder.py
 src/drori_ppmi_prep/segmentation/first.py
 src/drori_ppmi_prep/segmentation/freesurfer.py
+src/drori_ppmi_prep/segmentation/synthseg.py
 src/drori_ppmi_prep/segmentation/utils.py

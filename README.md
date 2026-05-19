@@ -76,6 +76,7 @@ drori-ppmi-build-analysis METADATA_CSV NIFTI_ROOT ANALYSIS_ROOT
 drori-ppmi-register-to-t1 ANALYSIS_ROOT
 drori-ppmi-run-first ANALYSIS_ROOT
 drori-ppmi-run-dbsegment ANALYSIS_ROOT
+drori-ppmi-run-synthseg ANALYSIS_ROOT
 drori-ppmi-run-freesurfer ANALYSIS_ROOT
 drori-ppmi-check-outputs OUTPUT_ROOT
 ```
@@ -98,12 +99,12 @@ drori-ppmi-run-pipeline PPMI_ROOT IDASEARCH_DIR OUTPUT_ROOT \
   --skip-freesurfer
 ```
 
-For example, use `--skip-first`, `--skip-dbsegment`, `--skip-freesurfer`, or
-`--skip-bias-correction` to disable optional processing during the full
-pipeline. When `--parallel` is used, DBSegment is run CPU-only automatically to
-avoid concurrent CUDA use. Use `--skip-infrastructure-if-exists` to rerun
-session-level processing without rebuilding metadata, NIfTI conversion, and the
-analysis directory when those outputs already exist.
+For example, use `--skip-first`, `--skip-dbsegment`, `--skip-synthseg`,
+`--skip-freesurfer`, or `--skip-bias-correction` to disable optional processing
+during the full pipeline. When `--parallel` is used, DBSegment is run CPU-only
+automatically to avoid concurrent CUDA use. Use `--skip-infrastructure-if-exists`
+to rerun session-level processing without rebuilding metadata, NIfTI conversion,
+and the analysis directory when those outputs already exist.
 
 ## Pipeline Steps
 
@@ -130,11 +131,12 @@ For each analysis session, the session pipeline then runs:
    `first_all_fast_firstseg.nii.gz` to create
    `first_all_fast_firstseg_eroded.nii.gz`.
 5. Optionally run DBSegment on the T1 reference.
-6. Optionally run FreeSurfer `recon-all` on the T1 reference, link the
+6. Optionally run FreeSurfer SynthSeg on the T1 reference.
+7. Optionally run FreeSurfer `recon-all` on the T1 reference, link the
    FreeSurfer `mri/` directory into the session segmentation directory, and
    export FreeSurfer `.mgz` volumes back into the session T1 space under
    `freesurfer/t1_space_outputs/`.
-7. Optionally run polynomial degree-2 bias correction on available
+8. Optionally run polynomial degree-2 bias correction on available
    `t1_space/T1.nii.gz`, `PD.nii.gz`, and `T2.nii.gz` images using the
    FreeSurfer `aparc+aseg.nii.gz` labels 2 and 41 as the white-matter mask.
 
@@ -181,6 +183,8 @@ t1_space/
       first_all_fast_firstseg.nii.gz
       first_all_fast_firstseg_eroded.nii.gz
     dbsegment/
+    synthseg/
+      synthseg.nii.gz
     freesurfer/
       t1_space_outputs/
   mri_unbias_deg2/
@@ -204,4 +208,4 @@ Core code is under `src/drori_ppmi_prep/`:
 - `analysis/`: analysis-directory creation
 - `preprocessing/`: SynthStrip and bias-correction helpers
 - `registration/`: FSL FLIRT registration helpers
-- `segmentation/`: FSL FIRST, FreeSurfer, DBSegment, and segmentation utilities
+- `segmentation/`: FSL FIRST, DBSegment, SynthSeg, FreeSurfer, and segmentation utilities

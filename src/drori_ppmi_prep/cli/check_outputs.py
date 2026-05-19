@@ -299,6 +299,10 @@ def build_checks(session_dir, native_sources=None):
         t1_reference_exists,
         (session_dir / "t1_space/segmentation/dbsegment/T1.nii.gz").exists(),
     )
+    checks["synthseg"] = status(
+        (session_dir / "t1_space/T1.nii.gz").exists(),
+        (session_dir / "t1_space/segmentation/synthseg/synthseg.nii.gz").exists(),
+    )
 
     freesurfer_link = session_dir / "t1_space/segmentation/freesurfer"
     checks["freesurfer_link"] = status(

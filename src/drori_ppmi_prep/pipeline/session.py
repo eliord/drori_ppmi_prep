@@ -8,6 +8,7 @@ from drori_ppmi_prep.registration.t1_space import register_session_to_t1_space
 from drori_ppmi_prep.segmentation.first import run_fsl_first
 from drori_ppmi_prep.segmentation.utils import erode_label_segmentation
 from drori_ppmi_prep.segmentation.dbsegment import run_dbsegment
+from drori_ppmi_prep.segmentation.synthseg import run_synthseg
 from drori_ppmi_prep.segmentation.freesurfer import (
     run_freesurfer,
     link_freesurfer_to_session,
@@ -48,12 +49,14 @@ def run_session_pipeline(
     synthstrip_cmd="mri_synthstrip",
     flirt_cmd="flirt",
     first_cmd="run_first_all",
+    synthseg_cmd="mri_synthseg",
     freesurfer_cmd="recon-all",
     mri_vol2vol_cmd="mri_vol2vol",
     dbsegment_cmd="DBSegment",
     dbsegment_model_path=None,
     dbsegment_use_cuda=True,
     run_first_segmentation=True,
+    run_synthseg_segmentation=True,
     run_freesurfer_segmentation=True,
     run_dbsegment_segmentation=True,
     run_bias_correction=True,
@@ -69,6 +72,7 @@ def run_session_pipeline(
     total_steps = (
             2
             + int(run_first_segmentation)
+            + int(run_synthseg_segmentation)
             + int(run_freesurfer_segmentation)
             + int(run_dbsegment_segmentation)
             + int(run_bias_correction)
@@ -153,6 +157,19 @@ def run_session_pipeline(
         print_done_or_skipped(status)
         step += 1
 
+    if run_synthseg_segmentation:
+        print(f"  ({step}/{total_steps}): Running SynthSeg ({synthseg_cmd})... ", end="", flush=True)
+
+        _, status = run_synthseg(
+            input_image=session_dir / "t1_space" / "T1.nii.gz",
+            output_dir=session_dir / "t1_space" / "segmentation" / "synthseg",
+            synthseg_cmd=synthseg_cmd,
+            overwrite=force,
+        )
+
+        print_done_or_skipped(status)
+        step += 1
+
     if run_freesurfer_segmentation:
         print(f"  ({step}/{total_steps}): Running FreeSurfer ({freesurfer_cmd})... ", end="", flush=True)
 
@@ -217,6 +234,7 @@ def main():
     parser.add_argument("session_id")
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--skip-first", action="store_true")
+    parser.add_argument("--skip-synthseg", action="store_true")
     parser.add_argument("--skip-freesurfer", action="store_true")
     parser.add_argument("--skip-dbsegment", action="store_true")
     parser.add_argument("--skip-bias-correction", action="store_true")
@@ -224,6 +242,7 @@ def main():
     parser.add_argument("--synthstrip-cmd", default="mri_synthstrip")
     parser.add_argument("--flirt-cmd", default="flirt")
     parser.add_argument("--first-cmd", default="run_first_all")
+    parser.add_argument("--synthseg-cmd", default="mri_synthseg")
 
     parser.add_argument("--dbsegment-cmd", default="DBSegment")
     parser.add_argument(
@@ -245,9 +264,11 @@ def main():
         synthstrip_cmd=args.synthstrip_cmd,
         flirt_cmd=args.flirt_cmd,
         first_cmd=args.first_cmd,
+        synthseg_cmd=args.synthseg_cmd,
         freesurfer_cmd=args.freesurfer_cmd,
         mri_vol2vol_cmd=args.mri_vol2vol_cmd,
         run_first_segmentation=not args.skip_first,
+        run_synthseg_segmentation=not args.skip_synthseg,
         run_freesurfer_segmentation=not args.skip_freesurfer,
 
         dbsegment_cmd=args.dbsegment_cmd,
