@@ -138,7 +138,7 @@ For each analysis session, the session pipeline then runs:
    `freesurfer/t1_space_outputs/`.
 8. Optionally run polynomial degree-2 bias correction on available
    `t1_space/T1.nii.gz`, `PD.nii.gz`, and `T2.nii.gz` images using the
-   SynthSeg labels 2 and 41 as the white-matter mask.
+   eroded SynthSeg labels 2 and 41 as the white-matter mask.
 
 ## Output Structure
 
@@ -189,6 +189,7 @@ t1_space/
       t1_space_outputs/
   mri_unbias_deg2/
     wm_labels_2_41_mask.nii.gz
+    wm_labels_2_41_mask_eroded.nii.gz
     T1.nii.gz
     T1_bias.nii.gz
     PD.nii.gz

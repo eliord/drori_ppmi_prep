@@ -5,6 +5,8 @@ from pathlib import Path
 import nibabel as nib
 import numpy as np
 
+from drori_ppmi_prep.segmentation.utils import erode_label_segmentation
+
 
 SYNTHSEG_WM_LABELS = (2, 41)
 
@@ -43,6 +45,7 @@ def run_t1_space_bias_correction(
         / "synthseg.nii.gz"
     )
     wm_mask = output_dir / "wm_labels_2_41_mask.nii.gz"
+    eroded_wm_mask = output_dir / "wm_labels_2_41_mask_eroded.nii.gz"
 
     if not synthseg_segmentation.exists():
         return None, "missing"
@@ -66,7 +69,7 @@ def run_t1_space_bias_correction(
             output_dir / image_path.name,
             output_dir / f"{image_path.name.removesuffix('.nii.gz')}_bias.nii.gz",
         ])
-    expected_outputs.append(wm_mask)
+    expected_outputs.extend([wm_mask, eroded_wm_mask])
 
     if all(path.exists() for path in expected_outputs) and not overwrite:
         return output_dir, "skipped"
@@ -84,6 +87,16 @@ def run_t1_space_bias_correction(
         if mask_status != "done":
             return None, mask_status
 
+    if overwrite or not eroded_wm_mask.exists():
+        eroded_output = erode_label_segmentation(
+            segmentation_file=wm_mask,
+            output_file=eroded_wm_mask,
+            iterations=1,
+            overwrite=overwrite,
+        )
+        if eroded_output is None:
+            return None, "failed"
+
     for image_path in images:
         corrected_path = output_dir / image_path.name
         bias_path = output_dir / f"{image_path.name.removesuffix('.nii.gz')}_bias.nii.gz"
@@ -93,7 +106,7 @@ def run_t1_space_bias_correction(
 
         unbias_nifti(
             image_path=image_path,
-            mask_path=wm_mask,
+            mask_path=eroded_wm_mask,
             corrected_path=corrected_path,
             bias_field_path=bias_path,
             degree=degree,

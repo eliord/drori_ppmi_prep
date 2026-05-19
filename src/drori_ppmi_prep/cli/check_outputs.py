@@ -328,7 +328,8 @@ def build_checks(session_dir, native_sources=None):
             and (bias_dir / f"{image}_bias.nii.gz").exists()
             for image in bias_images
         )
-        and (bias_dir / "wm_labels_2_41_mask.nii.gz").exists(),
+        and (bias_dir / "wm_labels_2_41_mask.nii.gz").exists()
+        and (bias_dir / "wm_labels_2_41_mask_eroded.nii.gz").exists(),
     )
 
     return checks
