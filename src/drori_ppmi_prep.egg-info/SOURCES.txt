@@ -5,6 +5,7 @@ src/drori_ppmi_prep.egg-info/PKG-INFO
 src/drori_ppmi_prep.egg-info/SOURCES.txt
 src/drori_ppmi_prep.egg-info/dependency_links.txt
 src/drori_ppmi_prep.egg-info/entry_points.txt
+src/drori_ppmi_prep.egg-info/requires.txt
 src/drori_ppmi_prep.egg-info/top_level.txt
 src/drori_ppmi_prep/analysis/__init__.py
 src/drori_ppmi_prep/analysis/dataset_builder.py
