@@ -65,11 +65,6 @@ def all_exist(session_dir, paths):
     return all((session_dir / path).exists() for path in paths)
 
 
-def any_nifti_in(session_dir, path):
-    target_dir = session_dir / path
-    return target_dir.exists() and any(target_dir.glob("*.nii.gz"))
-
-
 def status(applicable, complete):
     if not applicable:
         return "not_applicable"
@@ -312,7 +307,7 @@ def build_checks(session_dir, native_sources=None):
     )
     checks["freesurfer_t1_space_outputs"] = status(
         freesurfer_link.exists(),
-        any_nifti_in(session_dir, Path("t1_space/segmentation/freesurfer/t1_space_outputs")),
+        (session_dir / "t1_space/segmentation/freesurfer/t1_space_outputs/aparc+aseg.nii.gz").exists(),
     )
 
     bias_source = session_dir / "t1_space/segmentation/freesurfer/t1_space_outputs/aparc+aseg.nii.gz"

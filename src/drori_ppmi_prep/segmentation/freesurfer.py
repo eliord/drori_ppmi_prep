@@ -102,11 +102,24 @@ def export_all_freesurfer_mgz_to_orig_space(
     if shutil.which(mri_vol2vol_cmd) is None:
         return [], "missing_command"
 
+    required_segmentation = freesurfer_mri_dir / "aparc+aseg.mgz"
+    if not required_segmentation.exists():
+        return [], "missing"
+
     output_dir.mkdir(parents=True, exist_ok=True)
 
     exported = []
 
-    for input_mgz in sorted(freesurfer_mri_dir.glob("*.mgz")):
+    input_mgz_files = [
+        required_segmentation,
+        *[
+            path
+            for path in sorted(freesurfer_mri_dir.glob("*.mgz"))
+            if path != required_segmentation
+        ],
+    ]
+
+    for input_mgz in input_mgz_files:
         output_name = input_mgz.with_suffix(".nii.gz").name
         output_file = output_dir / output_name
 
@@ -141,6 +154,12 @@ def export_all_freesurfer_mgz_to_orig_space(
         if result.returncode != 0:
             return exported, "failed"
         exported.append(output_file)
+
+        if input_mgz == required_segmentation and not output_file.exists():
+            return exported, "failed"
+
+    if not (output_dir / "aparc+aseg.nii.gz").exists():
+        return exported, "failed"
 
     if exported:
         return exported, "done"
