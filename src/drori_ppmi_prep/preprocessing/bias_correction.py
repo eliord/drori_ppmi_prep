@@ -6,22 +6,22 @@ import nibabel as nib
 import numpy as np
 
 
-FREESURFER_WM_LABELS = (2, 41)
+SYNTHSEG_WM_LABELS = (2, 41)
 
 
-def create_freesurfer_wm_mask(aparc_aseg_path: str | Path, output_mask_path: str | Path):
-    aparc_aseg_path = Path(aparc_aseg_path)
+def create_synthseg_wm_mask(synthseg_path: str | Path, output_mask_path: str | Path):
+    synthseg_path = Path(synthseg_path)
     output_mask_path = Path(output_mask_path)
 
-    if not aparc_aseg_path.exists():
+    if not synthseg_path.exists():
         return None, "missing"
 
-    aseg_img = nib.load(str(aparc_aseg_path))
-    aseg_data = aseg_img.get_fdata()
-    mask = np.isin(np.rint(aseg_data).astype(np.int32), FREESURFER_WM_LABELS).astype(np.uint8)
+    synthseg_img = nib.load(str(synthseg_path))
+    synthseg_data = synthseg_img.get_fdata()
+    mask = np.isin(np.rint(synthseg_data).astype(np.int32), SYNTHSEG_WM_LABELS).astype(np.uint8)
 
     output_mask_path.parent.mkdir(parents=True, exist_ok=True)
-    mask_img = nib.Nifti1Image(mask, aseg_img.affine, aseg_img.header)
+    mask_img = nib.Nifti1Image(mask, synthseg_img.affine, synthseg_img.header)
     mask_img.set_data_dtype(np.uint8)
     nib.save(mask_img, str(output_mask_path))
 
@@ -36,16 +36,15 @@ def run_t1_space_bias_correction(
     session_dir = Path(session_dir)
     t1_space_dir = session_dir / "t1_space"
     output_dir = t1_space_dir / f"mri_unbias_deg{degree}"
-    aparc_aseg = (
+    synthseg_segmentation = (
         t1_space_dir
         / "segmentation"
-        / "freesurfer"
-        / "t1_space_outputs"
-        / "aparc+aseg.nii.gz"
+        / "synthseg"
+        / "synthseg.nii.gz"
     )
     wm_mask = output_dir / "wm_labels_2_41_mask.nii.gz"
 
-    if not aparc_aseg.exists():
+    if not synthseg_segmentation.exists():
         return None, "missing"
 
     images = [
@@ -81,7 +80,7 @@ def run_t1_space_bias_correction(
         ) from exc
 
     if overwrite or not wm_mask.exists():
-        _, mask_status = create_freesurfer_wm_mask(aparc_aseg, wm_mask)
+        _, mask_status = create_synthseg_wm_mask(synthseg_segmentation, wm_mask)
         if mask_status != "done":
             return None, mask_status
 

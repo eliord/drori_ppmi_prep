@@ -314,7 +314,7 @@ def build_checks(session_dir, native_sources=None):
         (session_dir / "t1_space/segmentation/freesurfer/t1_space_outputs/aparc+aseg.nii.gz").exists(),
     )
 
-    bias_source = session_dir / "t1_space/segmentation/freesurfer/t1_space_outputs/aparc+aseg.nii.gz"
+    bias_source = session_dir / "t1_space/segmentation/synthseg/synthseg.nii.gz"
     bias_dir = session_dir / "t1_space/mri_unbias_deg2"
     bias_images = [
         image

@@ -170,6 +170,18 @@ def run_session_pipeline(
         print_done_or_skipped(status)
         step += 1
 
+    if run_bias_correction:
+        print(f"  ({step}/{total_steps}): Running polynomial bias correction... ", end="", flush=True)
+
+        _, status = run_t1_space_bias_correction(
+            session_dir=session_dir,
+            overwrite=force,
+            degree=2,
+        )
+
+        print_done_or_skipped(status)
+        step += 1
+
     if run_freesurfer_segmentation:
         print(f"  ({step}/{total_steps}): Running FreeSurfer ({freesurfer_cmd})... ", end="", flush=True)
 
@@ -206,18 +218,6 @@ def run_session_pipeline(
 
         print_done_or_skipped(status)
 
-        step += 1
-
-    if run_bias_correction:
-        print(f"  ({step}/{total_steps}): Running polynomial bias correction... ", end="", flush=True)
-
-        _, status = run_t1_space_bias_correction(
-            session_dir=session_dir,
-            overwrite=force,
-            degree=2,
-        )
-
-        print_done_or_skipped(status)
         step += 1
 
     print(f" [DONE ] {subject_id} / {session_id}")
