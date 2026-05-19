@@ -9,6 +9,10 @@ from drori_ppmi_prep.segmentation.utils import erode_label_segmentation
 
 
 SYNTHSEG_WM_LABELS = (2, 41)
+README_TEXT = """Bias map is estimated in each image using a 2-degree 3D polynomial within white-matter mask.
+White-matter mask is defined as an eroded whole-WM ROI from SynthSeg.
+Raw image is divided by the estimated bias map.
+"""
 
 
 def create_synthseg_wm_mask(synthseg_path: str | Path, output_mask_path: str | Path):
@@ -46,6 +50,7 @@ def run_t1_space_bias_correction(
     )
     wm_mask = output_dir / "wm_labels_2_41_mask.nii.gz"
     eroded_wm_mask = output_dir / "wm_labels_2_41_mask_eroded.nii.gz"
+    readme_file = output_dir / "README.txt"
 
     if not synthseg_segmentation.exists():
         return None, "missing"
@@ -69,7 +74,7 @@ def run_t1_space_bias_correction(
             output_dir / image_path.name,
             output_dir / f"{image_path.name.removesuffix('.nii.gz')}_bias.nii.gz",
         ])
-    expected_outputs.extend([wm_mask, eroded_wm_mask])
+    expected_outputs.extend([wm_mask, eroded_wm_mask, readme_file])
 
     if all(path.exists() for path in expected_outputs) and not overwrite:
         return output_dir, "skipped"
@@ -96,6 +101,9 @@ def run_t1_space_bias_correction(
         )
         if eroded_output is None:
             return None, "failed"
+
+    if overwrite or not readme_file.exists():
+        readme_file.write_text(README_TEXT)
 
     for image_path in images:
         corrected_path = output_dir / image_path.name

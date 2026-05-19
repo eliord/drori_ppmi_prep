@@ -188,6 +188,7 @@ t1_space/
     freesurfer/
       t1_space_outputs/
   mri_unbias_deg2/
+    README.txt
     wm_labels_2_41_mask.nii.gz
     wm_labels_2_41_mask_eroded.nii.gz
     T1.nii.gz
