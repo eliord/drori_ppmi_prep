@@ -64,6 +64,7 @@ def run_one_session(job):
         run_freesurfer,
         run_dbsegment,
         run_bias_correction,
+        force_bias_correction,
         quiet,
     ) = job
 
@@ -86,6 +87,7 @@ def run_one_session(job):
             run_freesurfer_segmentation=run_freesurfer,
             run_dbsegment_segmentation=run_dbsegment,
             run_bias_correction=run_bias_correction,
+            force_bias_correction=force_bias_correction,
         )
 
     if quiet:
@@ -147,6 +149,11 @@ def main():
     parser.add_argument("--skip-first", action="store_true")
     parser.add_argument("--skip-synthseg", action="store_true")
     parser.add_argument("--skip-bias-correction", action="store_true")
+    parser.add_argument(
+        "--force-bias-correction",
+        action="store_true",
+        help="Recreate only polynomial bias-correction outputs during session processing.",
+    )
 
     parser.add_argument(
         "--parallel",
@@ -217,6 +224,7 @@ def main():
                     not args.skip_freesurfer,
                     not args.skip_dbsegment,
                     not args.skip_bias_correction,
+                    args.force_bias_correction,
                     args.parallel
                 )
             )

@@ -104,7 +104,9 @@ For example, use `--skip-first`, `--skip-dbsegment`, `--skip-synthseg`,
 during the full pipeline. When `--parallel` is used, DBSegment is run CPU-only
 automatically to avoid concurrent CUDA use. Use `--skip-infrastructure-if-exists`
 to rerun session-level processing without rebuilding metadata, NIfTI conversion,
-and the analysis directory when those outputs already exist.
+and the analysis directory when those outputs already exist. Use
+`--force-bias-correction` to recreate only the `mri_unbias_deg2` outputs without
+forcing the other session-level steps.
 
 ## Pipeline Steps
 
@@ -138,7 +140,8 @@ For each analysis session, the session pipeline then runs:
    `freesurfer/t1_space_outputs/`.
 8. Optionally run polynomial degree-2 bias correction on available
    `t1_space/T1.nii.gz`, `PD.nii.gz`, and `T2.nii.gz` images using the
-   eroded SynthSeg labels 2 and 41 as the white-matter mask.
+   eroded SynthSeg labels 2 and 41 as the white-matter mask and the SynthStrip
+   T1 brain mask as the brain mask.
 
 ## Output Structure
 
@@ -189,8 +192,8 @@ t1_space/
       t1_space_outputs/
   mri_unbias_deg2/
     README.txt
-    wm_labels_2_41_mask.nii.gz
-    wm_labels_2_41_mask_eroded.nii.gz
+    wm_mask.nii.gz
+    wm_mask_eroded.nii.gz
     T1.nii.gz
     T1_bias.nii.gz
     PD.nii.gz
