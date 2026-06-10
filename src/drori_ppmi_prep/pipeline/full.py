@@ -13,6 +13,7 @@ from drori_ppmi_prep.cli.check_outputs import (
     check_analysis_outputs,
     print_summary,
     summarize,
+    write_csv,
 )
 from drori_ppmi_prep.pipeline.infrastructure import run_build_infrastructure
 from drori_ppmi_prep.pipeline.paths import validate_output_root_path
@@ -80,6 +81,7 @@ def run_one_session(job):
         run_dbsegment,
         run_bias_correction,
         force_bias_correction,
+        restart_incomplete_freesurfer,
         quiet,
     ) = job
 
@@ -109,6 +111,7 @@ def run_one_session(job):
             run_dbsegment_segmentation=run_dbsegment,
             run_bias_correction=run_bias_correction,
             force_bias_correction=force_bias_correction,
+            restart_incomplete_freesurfer=restart_incomplete_freesurfer,
         )
 
     if quiet:
@@ -194,6 +197,11 @@ def main():
     )
     parser.add_argument("--skip-mrgrad", action="store_true")
     parser.add_argument("--skip-roi-stats", action="store_true")
+    parser.add_argument(
+        "--restart-incomplete-freesurfer",
+        action="store_true",
+        help="Delete and restart only incomplete FreeSurfer subject directories.",
+    )
     parser.add_argument(
         "--force-bias-correction",
         action="store_true",
@@ -300,6 +308,7 @@ def main():
                         not args.skip_dbsegment,
                         not args.skip_bias_correction,
                         args.force_bias_correction,
+                        args.restart_incomplete_freesurfer,
                         args.parallel
                     )
                 )
@@ -389,6 +398,11 @@ def main():
     rows = check_analysis_outputs(analysis_root, native_source_availability)
     summary = summarize(rows)
     print_summary(analysis_root, rows, summary)
+    if rows:
+        outputs_csv = output_root / "ppmi_preprocessing_outputs.csv"
+        write_csv(rows, outputs_csv)
+        print()
+        print(f"CSV report: {outputs_csv}")
     print()
 
 

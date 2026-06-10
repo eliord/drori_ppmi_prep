@@ -14,6 +14,7 @@ def run_freesurfer_segmentations(
     freesurfer_cmd="recon-all",
     mri_vol2vol_cmd="mri_vol2vol",
     overwrite=False,
+    restart_incomplete_freesurfer=False,
 ):
     analysis_root = Path(analysis_root)
 
@@ -50,6 +51,7 @@ def run_freesurfer_segmentations(
                 subject_id=freesurfer_subject_id,
                 recon_all_cmd=freesurfer_cmd,
                 overwrite=overwrite,
+                restart_incomplete=restart_incomplete_freesurfer,
             )
 
             if status in {"missing", "missing_command", "failed"}:
@@ -69,7 +71,7 @@ def run_freesurfer_segmentations(
                     mri_vol2vol_cmd=mri_vol2vol_cmd,
                     overwrite=overwrite,
                 )
-                if export_status in {"missing_command", "failed"}:
+                if export_status not in {"done", "skipped"}:
                     skipped_sessions += 1
                     continue
 
@@ -106,6 +108,11 @@ def main():
         action="store_true",
         help="Overwrite existing outputs",
     )
+    parser.add_argument(
+        "--restart-incomplete-freesurfer",
+        action="store_true",
+        help="Delete and restart only incomplete FreeSurfer subject directories.",
+    )
 
     args = parser.parse_args()
 
@@ -115,6 +122,7 @@ def main():
         freesurfer_cmd=args.freesurfer_cmd,
         mri_vol2vol_cmd=args.mri_vol2vol_cmd,
         overwrite=args.overwrite,
+        restart_incomplete_freesurfer=args.restart_incomplete_freesurfer,
     )
 
 

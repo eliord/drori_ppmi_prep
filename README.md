@@ -117,7 +117,9 @@ concurrent CUDA use and mrGrad runs with MATLAB `Parallel = true`. Use
 `--skip-infrastructure-if-exists` to rerun session-level processing without
 rebuilding metadata, NIfTI conversion, and the analysis directory when those
 outputs already exist. Use `--force-bias-correction` to recreate only the
-`mri_unbias_deg2` outputs without forcing the other session-level steps.
+`mri_unbias_deg2` outputs without forcing the other session-level steps. Use
+`--restart-incomplete-freesurfer` to delete and restart only incomplete
+FreeSurfer subject directories while leaving completed reconstructions intact.
 
 The MASSP step uses the AHEAD template and MASSP 2021 Older Adults atlas from
 Figshare. By default, the pipeline downloads missing resources into
@@ -149,7 +151,8 @@ Both presets sample corrected T1, T2, and PD images using equidistance
 segments, `max_change = [2 3 1]` for each ROI, mrGrad `extended` output mode,
 and `allow_missing = true`. The mrGrad input preserves the row order from
 `ppmi_metadata.csv` and includes every metadata row, including sessions with
-missing inputs. Results are written under:
+missing inputs. Metadata rows without a session ID use a unique placeholder
+such as `3305_missing-session_row-177`. Results are written under:
 
 ```text
 group_analysis/mrGrad/mrgrad-putamen-fslfirst-10seg/

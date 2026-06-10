@@ -183,16 +183,19 @@ def collect_mrgrad_sessions(analysis_root, metadata_csv, config):
 
     metadata = pd.read_csv(
         metadata_csv,
-        dtype={"SubjectID": str, "SessionID": str, "AnalysisDir": str},
+        dtype={"RowID": str, "SubjectID": str, "SessionID": str, "AnalysisDir": str},
     )
-    required_columns = {"SubjectID", "SessionID"}
+    required_columns = {"RowID", "SubjectID", "SessionID"}
     if not required_columns <= set(metadata.columns):
-        raise ValueError("Metadata CSV must contain SubjectID and SessionID columns.")
+        raise ValueError("Metadata CSV must contain RowID, SubjectID, and SessionID columns.")
 
     rows = []
     for _, metadata_row in metadata.iterrows():
+        row_id = normalize_subject_id(metadata_row["RowID"])
         subject_id = normalize_subject_id(metadata_row["SubjectID"])
         session_id = str(metadata_row["SessionID"]).strip()
+        if not session_id or session_id.lower() == "nan":
+            session_id = f"missing-session_row-{row_id}"
         analysis_dir = str(metadata_row.get("AnalysisDir", "")).strip()
         if not analysis_dir or analysis_dir.lower() == "nan":
             analysis_dir = str(Path(subject_id) / session_id)

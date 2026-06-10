@@ -325,7 +325,10 @@ def build_checks(session_dir, native_sources=None):
     )
     checks["freesurfer_t1_space_outputs"] = status(
         freesurfer_link.exists(),
-        (session_dir / "t1_space/segmentation/freesurfer/t1_space_outputs/aparc+aseg.nii.gz").exists(),
+        (
+            session_dir
+            / "t1_space/segmentation/freesurfer/t1_space_outputs/aparc.DKTatlas+aseg.nii.gz"
+        ).exists(),
     )
 
     bias_source = session_dir / "t1_space/segmentation/synthseg/synthseg.nii.gz"

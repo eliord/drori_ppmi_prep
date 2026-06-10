@@ -6,12 +6,24 @@ import nibabel as nib
 import numpy as np
 
 
+REQUIRED_FREESURFER_SEGMENTATIONS = (
+    "aparc+aseg.mgz",
+    "aparc.DKTatlas+aseg.mgz",
+)
+
+
+def freesurfer_outputs_exist(subject_dir):
+    mri_dir = Path(subject_dir) / "mri"
+    return all((mri_dir / filename).exists() for filename in REQUIRED_FREESURFER_SEGMENTATIONS)
+
+
 def run_freesurfer(
     input_image,
     subjects_dir,
     subject_id,
     recon_all_cmd="recon-all",
     overwrite=False,
+    restart_incomplete=False,
 ):
     input_image = Path(input_image)
     subjects_dir = Path(subjects_dir)
@@ -20,16 +32,13 @@ def run_freesurfer(
     if not input_image.exists():
         return None, "missing"
 
-    if subject_dir.exists() and (subject_dir / "mri").exists() and not overwrite:
+    if freesurfer_outputs_exist(subject_dir) and not overwrite:
         return subject_dir, "skipped"
-
-    if subject_dir.exists() and not overwrite:
-        return None, "failed"
 
     if shutil.which(recon_all_cmd) is None:
         return None, "missing_command"
 
-    if subject_dir.exists() and overwrite:
+    if subject_dir.exists() and (overwrite or restart_incomplete):
         shutil.rmtree(subject_dir)
 
     subjects_dir.mkdir(parents=True, exist_ok=True)
@@ -38,9 +47,10 @@ def run_freesurfer(
         recon_all_cmd,
         "-subjid", subject_id,
         "-sd", str(subjects_dir),
-        "-i", str(input_image),
-        "-all",
     ]
+    if not subject_dir.exists():
+        cmd.extend(["-i", str(input_image)])
+    cmd.append("-all")
 
     result = subprocess.run(
         cmd,
@@ -52,7 +62,7 @@ def run_freesurfer(
     if result.returncode != 0:
         return None, "failed"
 
-    if not (subject_dir / "mri").exists():
+    if not freesurfer_outputs_exist(subject_dir):
         return None, "failed"
 
     return subject_dir, "done"
@@ -102,8 +112,11 @@ def export_all_freesurfer_mgz_to_orig_space(
     if shutil.which(mri_vol2vol_cmd) is None:
         return [], "missing_command"
 
-    required_segmentation = freesurfer_mri_dir / "aparc+aseg.mgz"
-    if not required_segmentation.exists():
+    required_segmentations = [
+        freesurfer_mri_dir / filename
+        for filename in REQUIRED_FREESURFER_SEGMENTATIONS
+    ]
+    if not all(path.exists() for path in required_segmentations):
         return [], "missing"
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -111,11 +124,11 @@ def export_all_freesurfer_mgz_to_orig_space(
     exported = []
 
     input_mgz_files = [
-        required_segmentation,
+        *required_segmentations,
         *[
             path
             for path in sorted(freesurfer_mri_dir.glob("*.mgz"))
-            if path != required_segmentation
+            if path not in required_segmentations
         ],
     ]
 
@@ -155,10 +168,13 @@ def export_all_freesurfer_mgz_to_orig_space(
             return exported, "failed"
         exported.append(output_file)
 
-        if input_mgz == required_segmentation and not output_file.exists():
+        if input_mgz in required_segmentations and not output_file.exists():
             return exported, "failed"
 
-    if not (output_dir / "aparc+aseg.nii.gz").exists():
+    if not all(
+        (output_dir / Path(filename).with_suffix(".nii.gz").name).exists()
+        for filename in REQUIRED_FREESURFER_SEGMENTATIONS
+    ):
         return exported, "failed"
 
     if exported:

@@ -75,6 +75,7 @@ def run_session_pipeline(
     run_dbsegment_segmentation=True,
     run_bias_correction=True,
     force_bias_correction=False,
+    restart_incomplete_freesurfer=False,
 ):
     config = load_ppmi_config(output_root)
     analysis_root = Path(config["analysis_root"])
@@ -249,6 +250,7 @@ def run_session_pipeline(
             subject_id=freesurfer_subject_id,
             recon_all_cmd=freesurfer_cmd,
             overwrite=force,
+            restart_incomplete=restart_incomplete_freesurfer,
         )
 
         status = freesurfer_status
@@ -267,7 +269,7 @@ def run_session_pipeline(
                     mri_vol2vol_cmd=mri_vol2vol_cmd,
                     overwrite=force,
                 )
-                if export_status in {"failed", "missing_command"}:
+                if export_status not in {"done", "skipped"}:
                     status = export_status
 
         print_done_or_skipped(status)
@@ -293,6 +295,11 @@ def main():
     parser.add_argument("--skip-freesurfer", action="store_true")
     parser.add_argument("--skip-dbsegment", action="store_true")
     parser.add_argument("--skip-bias-correction", action="store_true")
+    parser.add_argument(
+        "--restart-incomplete-freesurfer",
+        action="store_true",
+        help="Delete and restart only incomplete FreeSurfer subject directories.",
+    )
     parser.add_argument(
         "--force-bias-correction",
         action="store_true",
@@ -351,6 +358,7 @@ def main():
         run_dbsegment_segmentation=not args.skip_dbsegment,
         run_bias_correction=not args.skip_bias_correction,
         force_bias_correction=args.force_bias_correction,
+        restart_incomplete_freesurfer=args.restart_incomplete_freesurfer,
     )
 
 
