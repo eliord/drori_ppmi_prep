@@ -19,9 +19,13 @@ from drori_ppmi_prep.pipeline.paths import validate_output_root_path
 from drori_ppmi_prep.pipeline.session import run_session_pipeline
 from drori_ppmi_prep.segmentation.massp import (
     AHEAD_TEMPLATE_ARTICLE_ID,
-    AHEAD_TEMPLATE_FILENAME,
-    MASSP_ATLAS_ARTICLE_ID,
-    MASSP_ATLAS_FILENAME,
+    DEFAULT_MASSP_COHORT,
+    DEFAULT_MASSP_VERSION,
+    MASSP_COHORT_CHOICES,
+    MASSP_VERSION_CHOICES,
+    default_template_filename_for_massp,
+    get_massp_resource,
+    massp_cache_subdir,
     resolve_massp_resource,
 )
 
@@ -71,6 +75,8 @@ def run_one_session(job):
         dbsegment_cmd,
         massp_atlas_path,
         massp_template_path,
+        massp_version,
+        massp_cohort,
         massp_download,
         dbsegment_use_cuda,
         run_first,
@@ -101,6 +107,8 @@ def run_one_session(job):
             dbsegment_cmd=dbsegment_cmd,
             massp_atlas_path=massp_atlas_path,
             massp_template_path=massp_template_path,
+            massp_version=massp_version,
+            massp_cohort=massp_cohort,
             massp_download=massp_download,
             dbsegment_use_cuda=dbsegment_use_cuda,
             run_first_segmentation=run_first,
@@ -158,6 +166,18 @@ def main():
     parser.add_argument("--ants-apply-cmd", default="antsApplyTransforms")
     parser.add_argument("--massp-atlas", default=None)
     parser.add_argument("--massp-template", default=None)
+    parser.add_argument(
+        "--massp-cohort",
+        choices=MASSP_COHORT_CHOICES,
+        default=DEFAULT_MASSP_COHORT,
+        help=f"MASSP atlas age cohort. Default: {DEFAULT_MASSP_COHORT}.",
+    )
+    parser.add_argument(
+        "--massp-version",
+        choices=MASSP_VERSION_CHOICES,
+        default=DEFAULT_MASSP_VERSION,
+        help=f"MASSP atlas version. Default: {DEFAULT_MASSP_VERSION}.",
+    )
     parser.add_argument(
         "--massp-no-download",
         action="store_true",
@@ -267,20 +287,27 @@ def main():
     massp_template_path = args.massp_template
 
     if not args.skip_session_pipeline and not args.skip_massp:
-        massp_cache_dir = output_root / "group_analysis" / "atlases" / "massp2021"
+        massp_resource = get_massp_resource(args.massp_version, args.massp_cohort)
+        template_filename = default_template_filename_for_massp(args.massp_version)
+        massp_cache_dir = (
+            output_root
+            / "group_analysis"
+            / "atlases"
+            / massp_cache_subdir(args.massp_version, args.massp_cohort)
+        )
         try:
             massp_template_path = resolve_massp_resource(
                 args.massp_template,
                 massp_cache_dir,
                 AHEAD_TEMPLATE_ARTICLE_ID,
-                AHEAD_TEMPLATE_FILENAME,
+                template_filename,
                 allow_download=not args.massp_no_download,
             )
             massp_atlas_path = resolve_massp_resource(
                 args.massp_atlas,
                 massp_cache_dir,
-                MASSP_ATLAS_ARTICLE_ID,
-                MASSP_ATLAS_FILENAME,
+                massp_resource.article_id,
+                massp_resource.filename,
                 allow_download=not args.massp_no_download,
             )
         except Exception:
@@ -320,6 +347,8 @@ def main():
                         args.dbsegment_cmd,
                         massp_atlas_path,
                         massp_template_path,
+                        args.massp_version,
+                        args.massp_cohort,
                         not args.massp_no_download,
                         not (args.parallel or args.dbsegment_cpu),
                         not args.skip_first,

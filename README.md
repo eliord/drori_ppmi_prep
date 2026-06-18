@@ -40,6 +40,49 @@ External tools are also required for the full pipeline:
 - MATLAB, for the optional standalone mrGrad analysis command:
   https://www.mathworks.com/products/matlab.html
 
+## Data Download And Provenance
+
+Before running the pipeline, download the imaging data directly from the PPMI
+database. The downloaded image archive should contain the PPMI DICOM directory
+tree, and the corresponding IDA image-search CSV files should be downloaded as
+well. These CSV files are required because the pipeline uses them to build the
+cohort metadata table and to map PPMI image identifiers to subject/session
+records.
+
+If clinical or demographic cohort tables are needed, download the relevant PPMI
+study-table CSV files separately and pass their root directory with
+`--study-tables-root`.
+
+For reproducibility, the exact PPMI search criteria used for a publication
+should be documented with the project. Drori et al. (2026) used the following
+PPMI 3T Siemens TrioTim image search:
+
+```text
+PPMI image collection, Advanced Search:
+- Tick "display in result" for all available fields.
+- Research Group: Control, PD, SWEDD, Prodromal
+- Modality: MRI
+- Manufacturer: SIEMENS
+- Mfg Model: TrioTim
+
+T1 search:
+- Slice Thickness (mm): 1
+- Weighting: T1
+
+T2/PD search:
+- Slice Thickness (mm): 3
+- Weighting: T2, PD
+
+After each search:
+- Save the CSV with all available data fields using "CSV Download".
+- Download DICOMs using "Add To Collection".
+
+Clinical data:
+- Download relevant tables from PPMI Study Data.
+- Study Data tables are downloaded for the full PPMI database and later
+  filtered to the imaging cohort by the pipeline.
+```
+
 ## Expected Input Layout
 
 The DICOM dataset is expected to follow the PPMI directory structure:
@@ -48,8 +91,8 @@ The DICOM dataset is expected to follow the PPMI directory structure:
 PPMI/SUBJECT_ID/SEQUENCE_NAME/SESSION_ID/IMAGE_ID/*.dcm
 ```
 
-The IDA search directory should contain the CSV files downloaded with the PPMI
-image data.
+The IDA search directory should contain the search CSV files exported from the
+same PPMI/IDA query used to download the image data.
 
 ## Main Commands
 
@@ -108,6 +151,18 @@ Some commands expose reusable processing steps without assuming a PPMI dataset
 layout. These are useful for applying individual pipeline components to other
 projects.
 
+Convert one DICOM directory to NIfTI:
+
+```bash
+drori-dicom-to-nifti \
+  --dicom-dir dicoms/T1 \
+  --output-dir nifti \
+  --filename T1
+```
+
+This is a thin wrapper around `dcm2niix -z y -b n -o OUTPUT_DIR -f FILENAME
+DICOM_DIR`, with an additional check that outputs are gzipped `.nii.gz` files.
+
 Run SynthStrip for one image:
 
 ```bash
@@ -138,6 +193,34 @@ drori-dbsegment \
 
 The DBSegment command also creates the derived whole GP/SN segmentation under
 `segmentation/dbsegment/derivatives/GP_SN_seg.nii.gz`.
+
+Erode a label segmentation:
+
+```bash
+drori-erode-labels \
+  --segmentation first_all_fast_firstseg.nii.gz \
+  --output first_all_fast_firstseg_eroded.nii.gz \
+  --label 12 \
+  --label 51
+```
+
+If `--label` is omitted, all nonzero labels are eroded independently. The
+erosion uses the same 6-neighbor structure as MATLAB `strel("sphere", 1)`.
+
+Create a binary mask from selected segmentation labels:
+
+```bash
+drori-label-mask \
+  --segmentation aparc+aseg.nii.gz \
+  --output wm_mask_eroded.nii.gz \
+  --label 2 \
+  --label 41 \
+  --erode
+```
+
+The mask command is generic: the input can be FreeSurfer, SynthSeg, or another
+label segmentation, as long as the requested labels are meaningful for that
+segmentation.
 
 Run FreeSurfer SynthSeg for one image:
 
@@ -177,13 +260,30 @@ drori-massp \
   --output-dir segmentation/massp
 ```
 
+The default MASSP resource is `--massp-version 2021 --massp-cohort old`, which
+uses the MASSP 2021 Older Probabilistic Atlas. Other supported combinations are
+available through the same flags:
+
+```bash
+drori-massp \
+  --target-image T1_brainmask.nii.gz \
+  --output-dir segmentation/massp \
+  --massp-version 2.0 \
+  --massp-cohort young
+```
+
+For MASSP 2.0, the package uses the discrete `avg-bestlabel` atlas file
+(`ahead-massp2_avg-bestlabel_*`) rather than the probabilistic maps or max-label
+variants.
+
 By default, missing AHEAD/MASSP resources are downloaded into
-`segmentation/massp/atlases/massp2021/`, and outputs are written under:
+`segmentation/massp/atlases/<selected_massp_resource>/`, and outputs are
+written under:
 
 ```text
 segmentation/massp/ahead2sub_ants/
   ahead_med_qr1_2ref.nii.gz
-  massp2021-parcellation_decade-61to80_2ref.nii.gz
+  <selected_massp_atlas>_2ref.nii.gz
   ahead2sub_0GenericAffine.mat
   ahead2sub_1Warp.nii.gz
   ahead2sub_1InverseWarp.nii.gz
@@ -207,6 +307,18 @@ Run polynomial bias correction for one image:
 drori-mri-unbias \
   --image T1.nii.gz \
   --mask wm_mask_eroded.nii.gz \
+  --brain-mask T1_brainmask_mask.nii.gz \
+  --corrected T1_unbiased.nii.gz \
+  --bias-field T1_bias.nii.gz \
+  --degree 2
+```
+
+This is equivalent to calling the `mri_unbias` package CLI directly:
+
+```bash
+mri-unbias \
+  T1.nii.gz \
+  wm_mask_eroded.nii.gz \
   --brain-mask T1_brainmask_mask.nii.gz \
   --corrected T1_unbiased.nii.gz \
   --bias-field T1_bias.nii.gz \
@@ -245,10 +357,14 @@ infrastructure building; missing study tables are reported and skipped.
 `--restart-incomplete-freesurfer` to delete and restart only incomplete
 FreeSurfer subject directories while leaving completed reconstructions intact.
 
-The MASSP step uses the AHEAD template and MASSP 2021 Older Adults atlas from
-Figshare. By default, the pipeline downloads missing resources into
-`OUTPUT_ROOT/group_analysis/atlases/massp2021/`. Use `--massp-atlas`,
-`--massp-template`, or `--massp-no-download` to use manually managed files.
+The PPMI session pipeline uses the AHEAD template and MASSP 2021 Older Adults
+atlas from Figshare by default (`--massp-version 2021 --massp-cohort old`). Use
+`--massp-version {2021,2.0}` and `--massp-cohort {old,young}` to choose another
+supported MASSP resource. For MASSP 2.0, the selected atlas is the discrete
+`avg-bestlabel` parcellation. Missing resources are downloaded into
+`OUTPUT_ROOT/group_analysis/atlases/<selected_massp_resource>/`. Use
+`--massp-atlas`, `--massp-template`, or `--massp-no-download` to use manually
+managed files.
 
 ## mrGrad Analyses
 
@@ -393,8 +509,9 @@ For each analysis session, the session pipeline then runs:
 6. Optionally run FreeSurfer SynthSeg on the T1 reference.
 7. Optionally run MASSP atlas segmentation by nonlinearly registering the AHEAD
    R1 template to the brain-masked T1 reference with ANTs and applying the
-   transform to the MASSP 2021 older-adults parcellation with nearest-neighbor
-   interpolation.
+   transform to the selected MASSP parcellation with nearest-neighbor
+   interpolation. The default is MASSP 2021 older adults; use
+   `--massp-version` and `--massp-cohort` to select another supported atlas.
 8. Optionally run FreeSurfer `recon-all` on the T1 reference, link the
    FreeSurfer `mri/` directory into the session segmentation directory, and
    export FreeSurfer `.mgz` volumes back into the session T1 space under

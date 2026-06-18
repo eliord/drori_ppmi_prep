@@ -22,8 +22,11 @@ src/drori_ppmi_prep/cli/check_outputs.py
 src/drori_ppmi_prep/cli/convert_dicoms.py
 src/drori_ppmi_prep/cli/download_massp.py
 src/drori_ppmi_prep/cli/general_dbsegment.py
+src/drori_ppmi_prep/cli/general_dicom_to_nifti.py
+src/drori_ppmi_prep/cli/general_erode_labels.py
 src/drori_ppmi_prep/cli/general_fslfirst.py
 src/drori_ppmi_prep/cli/general_freesurfer.py
+src/drori_ppmi_prep/cli/general_label_mask.py
 src/drori_ppmi_prep/cli/general_massp.py
 src/drori_ppmi_prep/cli/general_mri_unbias.py
 src/drori_ppmi_prep/cli/general_synthseg.py

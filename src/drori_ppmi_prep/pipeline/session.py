@@ -11,9 +11,13 @@ from drori_ppmi_prep.segmentation.dbsegment import run_dbsegment
 from drori_ppmi_prep.segmentation.synthseg import run_synthseg
 from drori_ppmi_prep.segmentation.massp import (
     AHEAD_TEMPLATE_ARTICLE_ID,
-    AHEAD_TEMPLATE_FILENAME,
-    MASSP_ATLAS_ARTICLE_ID,
-    MASSP_ATLAS_FILENAME,
+    DEFAULT_MASSP_COHORT,
+    DEFAULT_MASSP_VERSION,
+    MASSP_COHORT_CHOICES,
+    MASSP_VERSION_CHOICES,
+    default_template_filename_for_massp,
+    get_massp_resource,
+    massp_cache_subdir,
     resolve_massp_resource,
     run_massp_atlas_segmentation,
 )
@@ -65,6 +69,8 @@ def run_session_pipeline(
     dbsegment_cmd="DBSegment",
     massp_atlas_path=None,
     massp_template_path=None,
+    massp_version=DEFAULT_MASSP_VERSION,
+    massp_cohort=DEFAULT_MASSP_COHORT,
     massp_download=True,
     dbsegment_model_path=None,
     dbsegment_use_cuda=True,
@@ -192,20 +198,27 @@ def run_session_pipeline(
     if run_massp_segmentation:
         print(f"  ({step}/{total_steps}): Running MASSP atlas registration ({ants_registration_cmd})... ", end="", flush=True)
 
-        massp_cache_dir = output_root / "group_analysis" / "atlases" / "massp2021"
+        massp_resource = get_massp_resource(massp_version, massp_cohort)
+        template_filename = default_template_filename_for_massp(massp_version)
+        massp_cache_dir = (
+            output_root
+            / "group_analysis"
+            / "atlases"
+            / massp_cache_subdir(massp_version, massp_cohort)
+        )
         try:
             resolved_massp_template = resolve_massp_resource(
                 massp_template_path,
                 massp_cache_dir,
                 AHEAD_TEMPLATE_ARTICLE_ID,
-                AHEAD_TEMPLATE_FILENAME,
+                template_filename,
                 allow_download=massp_download,
             )
             resolved_massp_atlas = resolve_massp_resource(
                 massp_atlas_path,
                 massp_cache_dir,
-                MASSP_ATLAS_ARTICLE_ID,
-                MASSP_ATLAS_FILENAME,
+                massp_resource.article_id,
+                massp_resource.filename,
                 allow_download=massp_download,
             )
         except Exception:
@@ -217,6 +230,7 @@ def run_session_pipeline(
             output_dir=session_dir / "t1_space" / "segmentation" / "massp" / "ahead2sub_ants",
             atlas_path=resolved_massp_atlas,
             template_path=resolved_massp_template,
+            massp_resource=massp_resource,
             ants_registration_cmd=ants_registration_cmd,
             ants_apply_cmd=ants_apply_cmd,
             overwrite=force,
@@ -315,6 +329,18 @@ def main():
     parser.add_argument("--massp-atlas", default=None)
     parser.add_argument("--massp-template", default=None)
     parser.add_argument(
+        "--massp-cohort",
+        choices=MASSP_COHORT_CHOICES,
+        default=DEFAULT_MASSP_COHORT,
+        help=f"MASSP atlas age cohort. Default: {DEFAULT_MASSP_COHORT}.",
+    )
+    parser.add_argument(
+        "--massp-version",
+        choices=MASSP_VERSION_CHOICES,
+        default=DEFAULT_MASSP_VERSION,
+        help=f"MASSP atlas version. Default: {DEFAULT_MASSP_VERSION}.",
+    )
+    parser.add_argument(
         "--massp-no-download",
         action="store_true",
         help="Do not automatically download the MASSP atlas or AHEAD template if missing.",
@@ -347,6 +373,8 @@ def main():
         mri_vol2vol_cmd=args.mri_vol2vol_cmd,
         massp_atlas_path=args.massp_atlas,
         massp_template_path=args.massp_template,
+        massp_version=args.massp_version,
+        massp_cohort=args.massp_cohort,
         massp_download=not args.massp_no_download,
         run_first_segmentation=not args.skip_first,
         run_synthseg_segmentation=not args.skip_synthseg,

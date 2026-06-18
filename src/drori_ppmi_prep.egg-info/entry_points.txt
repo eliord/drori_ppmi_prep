@@ -1,7 +1,10 @@
 [console_scripts]
 drori-dbsegment = drori_ppmi_prep.cli.general_dbsegment:main
+drori-dicom-to-nifti = drori_ppmi_prep.cli.general_dicom_to_nifti:main
+drori-erode-labels = drori_ppmi_prep.cli.general_erode_labels:main
 drori-fslfirst = drori_ppmi_prep.cli.general_fslfirst:main
 drori-freesurfer = drori_ppmi_prep.cli.general_freesurfer:main
+drori-label-mask = drori_ppmi_prep.cli.general_label_mask:main
 drori-massp = drori_ppmi_prep.cli.general_massp:main
 drori-mri-unbias = drori_ppmi_prep.cli.general_mri_unbias:main
 drori-ppmi-build-analysis = drori_ppmi_prep.cli.build_analysis:main

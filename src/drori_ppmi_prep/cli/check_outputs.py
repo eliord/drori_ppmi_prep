@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 from drori_ppmi_prep.segmentation.first import is_valid_first_segmentation
+from drori_ppmi_prep.segmentation.massp import MASSP_RESOURCES, transformed_output_name
 
 
 def resolve_analysis_root(path):
@@ -73,6 +74,13 @@ def status(applicable, complete):
     if complete:
         return "done"
     return "missing_output"
+
+
+def any_supported_massp_output_exists(output_dir):
+    return any(
+        (output_dir / transformed_output_name(resource.filename)).exists()
+        for resource in MASSP_RESOURCES.values()
+    )
 
 
 def is_gzip_file(path):
@@ -272,7 +280,9 @@ def build_checks(session_dir, native_sources=None):
     )
     checks["massp"] = status(
         t1_reference_exists,
-        (session_dir / "t1_space/segmentation/massp/ahead2sub_ants/massp2021-parcellation_decade-61to80_2ref.nii.gz").exists(),
+        any_supported_massp_output_exists(
+            session_dir / "t1_space/segmentation/massp/ahead2sub_ants"
+        ),
     )
 
     freesurfer_link = session_dir / "t1_space/segmentation/freesurfer"

@@ -20,6 +20,7 @@ def matlab_sphere_1_structure():
 def erode_label_segmentation(
     segmentation_file,
     output_file=None,
+    labels=None,
     iterations=1,
     overwrite=False,
 ):
@@ -47,8 +48,11 @@ def erode_label_segmentation(
     if data.ndim != 3:
         return None
 
-    labels = np.unique(data)
-    labels = labels[labels != 0]
+    if labels is None:
+        labels = np.unique(data)
+        labels = labels[labels != 0]
+    else:
+        labels = np.asarray(labels, dtype=np.int32)
 
     eroded_data = np.zeros_like(data, dtype=np.int16)
 
@@ -73,6 +77,41 @@ def erode_label_segmentation(
     )
 
     out_img.set_data_dtype(np.int16)
+    nib.save(out_img, str(output_file))
+
+    return output_file
+
+
+def create_label_mask(
+    segmentation_file,
+    output_file,
+    labels,
+    overwrite=False,
+):
+    segmentation_file = Path(segmentation_file)
+    output_file = Path(output_file)
+
+    if output_file.exists() and not overwrite:
+        return output_file
+
+    if not segmentation_file.exists():
+        return None
+
+    try:
+        img = nib.load(str(segmentation_file))
+        data = img.get_fdata()
+    except Exception:
+        return None
+
+    if data.ndim != 3:
+        return None
+
+    labels = np.asarray(labels, dtype=np.int32)
+    mask = np.isin(np.rint(data).astype(np.int32), labels).astype(np.uint8)
+
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    out_img = nib.Nifti1Image(mask, affine=img.affine, header=img.header)
+    out_img.set_data_dtype(np.uint8)
     nib.save(out_img, str(output_file))
 
     return output_file

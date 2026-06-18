@@ -42,6 +42,9 @@ drori-synthseg = "drori_ppmi_prep.cli.general_synthseg:main"
 drori-freesurfer = "drori_ppmi_prep.cli.general_freesurfer:main"
 drori-massp = "drori_ppmi_prep.cli.general_massp:main"
 drori-mri-unbias = "drori_ppmi_prep.cli.general_mri_unbias:main"
+drori-dicom-to-nifti = "drori_ppmi_prep.cli.general_dicom_to_nifti:main"
+drori-erode-labels = "drori_ppmi_prep.cli.general_erode_labels:main"
+drori-label-mask = "drori_ppmi_prep.cli.general_label_mask:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

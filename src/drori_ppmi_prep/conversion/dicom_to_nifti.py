@@ -204,3 +204,63 @@ def convert_ppmi_dicoms_to_nifti(
         f"failed: {counts['failed']}, "
         f"unexpected layout: {counts['unexpected_layout']}."
     )
+
+
+def convert_dicom_dir_to_nifti(
+    dicom_dir: Union[str, Path],
+    output_dir: Union[str, Path],
+    filename: str,
+    dcm2niix_path: str = "dcm2niix",
+    overwrite: bool = False,
+):
+    """Convert one arbitrary DICOM directory to one or more gzipped NIfTI files."""
+    dicom_dir = Path(dicom_dir)
+    output_dir = Path(output_dir)
+
+    if not dicom_dir.exists():
+        raise FileNotFoundError(f"DICOM directory does not exist: {dicom_dir}")
+
+    if shutil.which(dcm2niix_path) is None:
+        raise FileNotFoundError(
+            f"dcm2niix not found: {dcm2niix_path}. "
+            "Install it and ensure it is available on PATH."
+        )
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    existing_outputs = find_expected_nifti_outputs(output_dir, filename)
+    if existing_outputs and not overwrite:
+        return [gzip_nifti_file(path) for path in existing_outputs], "skipped"
+
+    if overwrite:
+        for output_path in find_related_nifti_outputs(output_dir, filename):
+            output_path.unlink()
+
+    cmd = [
+        dcm2niix_path,
+        "-z", "y",
+        "-b", "n",
+        "-o", str(output_dir),
+        "-f", filename,
+        str(dicom_dir),
+    ]
+
+    result = subprocess.run(
+        cmd,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    if result.returncode != 0:
+        return [], "failed"
+
+    outputs = [
+        gzip_nifti_file(path)
+        for path in find_expected_nifti_outputs(output_dir, filename)
+    ]
+    outputs = [path for path in outputs if path is not None]
+    if outputs:
+        return outputs, "done"
+
+    return [], "failed"
