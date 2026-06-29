@@ -40,6 +40,20 @@ External tools are also required for the full pipeline:
 - MATLAB, for the optional standalone mrGrad analysis command:
   https://www.mathworks.com/products/matlab.html
 
+## Testing
+
+Install the development dependency and run the test suite from the repository
+root:
+
+```bash
+pip install -e ".[dev]"
+python -m pytest
+```
+
+The included tests cover package logic that does not require external imaging
+tools, such as metadata image selection, label erosion, DBSegment-derived
+segmentations, and ROI lookup-table naming.
+
 ## Data Download And Provenance
 
 Before running the pipeline, download the imaging data directly from the PPMI

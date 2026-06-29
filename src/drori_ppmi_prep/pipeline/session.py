@@ -40,7 +40,33 @@ def load_ppmi_config(output_root):
     return json.loads(config_path.read_text())
 
 
-def print_done_or_skipped(status):
+def _tail_nonempty_lines(path, max_lines=5):
+    path = Path(path)
+    if not path.exists() or not path.is_file():
+        return []
+    try:
+        lines = [line.strip() for line in path.read_text(errors="replace").splitlines()]
+    except OSError:
+        return []
+    lines = [line for line in lines if line]
+    return lines[-max_lines:]
+
+
+def failure_details(log_paths=(), expected_paths=()):
+    lines = []
+    missing_outputs = [Path(path) for path in expected_paths if not Path(path).exists()]
+    for path in missing_outputs[:5]:
+        lines.append(f"Missing expected output: {path}")
+    for path in [Path(path) for path in log_paths]:
+        if path.exists():
+            lines.append(f"Log: {path}")
+            tail = _tail_nonempty_lines(path)
+            if tail:
+                lines.append(f"Last log line: {tail[-1]}")
+    return lines
+
+
+def print_done_or_skipped(status, details=None):
     if status == "done":
         print("    DONE")
     elif status == "skipped":
@@ -51,6 +77,8 @@ def print_done_or_skipped(status):
         print("    SKIPPED: command not found")
     else:
         print("    FAILED")
+        for line in details or []:
+            print(f"      {line}")
 
 
 def run_session_pipeline(
@@ -161,7 +189,20 @@ def run_session_pipeline(
         if eroded_output is None:
             status = "failed"
 
-        print_done_or_skipped(status)
+        print_done_or_skipped(
+            status,
+            failure_details(
+                log_paths=[
+                    output_dir / "fsl_first_command.txt",
+                    output_dir / "fsl_first_stdout.log",
+                    output_dir / "fsl_first_stderr.log",
+                ],
+                expected_paths=[
+                    output_dir / "first_all_fast_firstseg.nii.gz",
+                    output_dir / "first_all_fast_firstseg_eroded.nii.gz",
+                ],
+            ),
+        )
         step += 1
 
     if run_dbsegment_segmentation:
@@ -179,7 +220,20 @@ def run_session_pipeline(
             use_cuda=dbsegment_use_cuda,
         )
 
-        print_done_or_skipped(status)
+        print_done_or_skipped(
+            status,
+            failure_details(
+                log_paths=[
+                    session_dir / "t1_space" / "segmentation" / "dbsegment" / "dbsegment_command.txt",
+                    session_dir / "t1_space" / "segmentation" / "dbsegment" / "dbsegment_stdout.log",
+                    session_dir / "t1_space" / "segmentation" / "dbsegment" / "dbsegment_stderr.log",
+                ],
+                expected_paths=[
+                    session_dir / "t1_space" / "segmentation" / "dbsegment" / "T1.nii.gz",
+                    session_dir / "t1_space" / "segmentation" / "dbsegment" / "derivatives" / "GP_SN_seg.nii.gz",
+                ],
+            ),
+        )
         step += 1
 
     if run_synthseg_segmentation:
@@ -192,7 +246,19 @@ def run_session_pipeline(
             overwrite=force,
         )
 
-        print_done_or_skipped(status)
+        print_done_or_skipped(
+            status,
+            failure_details(
+                log_paths=[
+                    session_dir / "t1_space" / "segmentation" / "synthseg" / "synthseg_command.txt",
+                    session_dir / "t1_space" / "segmentation" / "synthseg" / "synthseg_stdout.log",
+                    session_dir / "t1_space" / "segmentation" / "synthseg" / "synthseg_stderr.log",
+                ],
+                expected_paths=[
+                    session_dir / "t1_space" / "segmentation" / "synthseg" / "synthseg.nii.gz",
+                ],
+            ),
+        )
         step += 1
 
     if run_massp_segmentation:
@@ -236,7 +302,20 @@ def run_session_pipeline(
             overwrite=force,
         )
 
-        print_done_or_skipped(status)
+        massp_output_dir = session_dir / "t1_space" / "segmentation" / "massp" / "ahead2sub_ants"
+        print_done_or_skipped(
+            status,
+            failure_details(
+                log_paths=[
+                    massp_output_dir / "massp_registration_command.txt",
+                    massp_output_dir / "massp_registration_stdout.log",
+                    massp_output_dir / "massp_registration_stderr.log",
+                    massp_output_dir / "massp_apply_command.txt",
+                    massp_output_dir / "massp_apply_stdout.log",
+                    massp_output_dir / "massp_apply_stderr.log",
+                ],
+            ),
+        )
         step += 1
 
     if run_freesurfer_segmentation:
@@ -274,7 +353,23 @@ def run_session_pipeline(
                 if export_status not in {"done", "skipped"}:
                     status = export_status
 
-        print_done_or_skipped(status)
+        freesurfer_logs = [
+            subjects_dir / f"{freesurfer_subject_id}_recon-all_command.txt",
+            subjects_dir / f"{freesurfer_subject_id}_recon-all_stdout.log",
+            subjects_dir / f"{freesurfer_subject_id}_recon-all_stderr.log",
+            subjects_dir / freesurfer_subject_id / "scripts" / "recon-all.log",
+            subjects_dir / freesurfer_subject_id / "scripts" / "recon-all.error",
+        ]
+        freesurfer_expected = [
+            subjects_dir / freesurfer_subject_id / "mri" / "aparc+aseg.mgz",
+            subjects_dir / freesurfer_subject_id / "mri" / "aparc.DKTatlas+aseg.mgz",
+            session_dir / "t1_space" / "segmentation" / "freesurfer" / "t1_space_outputs" / "aparc+aseg.nii.gz",
+            session_dir / "t1_space" / "segmentation" / "freesurfer" / "t1_space_outputs" / "aparc.DKTatlas+aseg.nii.gz",
+        ]
+        print_done_or_skipped(
+            status,
+            failure_details(log_paths=freesurfer_logs, expected_paths=freesurfer_expected),
+        )
 
         step += 1
 

@@ -1,6 +1,0 @@
-pandas
-nibabel
-numpy
-scipy
-pydicom
-mri-unbias @ git+https://github.com/MezerLab/mri_unbias.git#subdirectory=python

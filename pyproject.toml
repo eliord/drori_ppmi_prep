@@ -5,8 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "drori_ppmi_prep"
 version = "0.1.0"
-description = "PPMI DICOM to NIfTI conversion tools"
+description = "PPMI MRI preprocessing pipeline for Drori et al. 2026"
+readme = "README.md"
 requires-python = ">=3.9"
+authors = [
+    {name = "Elior Drori"},
+]
 dependencies = [
     "pandas",
     "nibabel",
@@ -15,6 +19,16 @@ dependencies = [
     "pydicom",
     "mri-unbias @ git+https://github.com/MezerLab/mri_unbias.git#subdirectory=python",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[project.urls]
+Homepage = "https://github.com/MezerLab/drori_ppmi_prep"
+Repository = "https://github.com/MezerLab/drori_ppmi_prep"
+Issues = "https://github.com/MezerLab/drori_ppmi_prep/issues"
 
 [project.scripts]
 drori-ppmi-build-infrastructure = "drori_ppmi_prep.cli.build_infrastructure:main"
@@ -54,3 +68,6 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 drori_ppmi_prep = ["analysis/mrgrad_presets/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,4 +1,5 @@
 from pathlib import Path
+import shlex
 import shutil
 import subprocess
 
@@ -52,12 +53,15 @@ def run_fsl_first(
     if brain_extracted:
         cmd.append("-b")
 
-    result = subprocess.run(
-        cmd,
-        text=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.PIPE,
-    )
+    (output_dir / "fsl_first_command.txt").write_text(shlex.join(cmd) + "\n")
+    with (output_dir / "fsl_first_stdout.log").open("w") as stdout_f:
+        with (output_dir / "fsl_first_stderr.log").open("w") as stderr_f:
+            result = subprocess.run(
+                cmd,
+                text=True,
+                stdout=stdout_f,
+                stderr=stderr_f,
+            )
 
     if result.returncode != 0:
         return None, "failed"

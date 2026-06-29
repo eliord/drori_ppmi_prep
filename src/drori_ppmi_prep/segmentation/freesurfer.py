@@ -1,4 +1,5 @@
 import shutil
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -52,12 +53,19 @@ def run_freesurfer(
         cmd.extend(["-i", str(input_image)])
     cmd.append("-all")
 
-    result = subprocess.run(
-        cmd,
-        text=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
+    command_log = subjects_dir / f"{subject_id}_recon-all_command.txt"
+    stdout_log = subjects_dir / f"{subject_id}_recon-all_stdout.log"
+    stderr_log = subjects_dir / f"{subject_id}_recon-all_stderr.log"
+    command_log.write_text(shlex.join(cmd) + "\n")
+
+    with stdout_log.open("w") as stdout_f:
+        with stderr_log.open("w") as stderr_f:
+            result = subprocess.run(
+                cmd,
+                text=True,
+                stdout=stdout_f,
+                stderr=stderr_f,
+            )
 
     if result.returncode != 0:
         return None, "failed"
@@ -158,12 +166,17 @@ def export_all_freesurfer_mgz_to_orig_space(
         else:
             cmd.extend(["--interp", "trilinear"])
 
-        result = subprocess.run(
-            cmd,
-            text=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+        (output_dir / f"{input_mgz.stem}_mri_vol2vol_command.txt").write_text(
+            shlex.join(cmd) + "\n"
         )
+        with (output_dir / f"{input_mgz.stem}_mri_vol2vol_stdout.log").open("w") as stdout_f:
+            with (output_dir / f"{input_mgz.stem}_mri_vol2vol_stderr.log").open("w") as stderr_f:
+                result = subprocess.run(
+                    cmd,
+                    text=True,
+                    stdout=stdout_f,
+                    stderr=stderr_f,
+                )
         if result.returncode != 0:
             return exported, "failed"
         exported.append(output_file)
