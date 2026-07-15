@@ -19,6 +19,12 @@ bioRxiv. 2026. https://doi.org/10.64898/2026.03.16.711841
 
 ## Installation
 
+System prerequisites for installing the Python package:
+
+- Python >= 3.9
+- `git`, required because `mri-unbias` is installed directly from the Mezer Lab
+  GitHub repository
+
 Install the package in editable mode from the repository root:
 
 ```bash
